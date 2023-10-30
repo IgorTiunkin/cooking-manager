@@ -1,7 +1,7 @@
 package com.phantom.services;
 
-import com.phantom.models.ProductInStock;
-import org.junit.jupiter.api.Assertions;
+import com.phantom.inventory.models.ProductInStock;
+import com.phantom.inventory.services.ProductInStockService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

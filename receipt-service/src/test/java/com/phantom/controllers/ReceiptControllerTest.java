@@ -1,7 +1,8 @@
 package com.phantom.controllers;
 
-import com.phantom.dto.ReceiptDTO;
-import com.phantom.models.Receipt;
+import com.phantom.receipt.controllers.ReceiptController;
+import com.phantom.receipt.dto.ReceiptDTO;
+import com.phantom.receipt.models.Receipt;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

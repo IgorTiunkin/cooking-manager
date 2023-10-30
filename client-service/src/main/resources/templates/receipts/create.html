@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create</title>
+    <style>
+        label{
+            display:inline-block;
+            width:150px;
+            margin-right:30px;
+            text-align:right;
+        }
+
+        fieldset{
+            border:none;
+            width:500px;
+            margin:0px auto;
+        }
+    </style>
+</head>
+<body style="background: bisque">
+<div>
+    <div style="width: 50%;  margin: 0 auto">
+    <form th:method="POST" th:action="@{/receipts/save}" th:object="${blank}">
+        <label for="title">Choose receipt name</label>
+        <input type="text" th:field = "*{title}" id = "title"/>
+        <br>
+        <label for="actions">Choose actions</label>
+        <input type="text" th:field = "*{actions}" id = "actions"/>
+        <br>
+        <div th:if="${!blank.getUsedProducts().isEmpty()}" style="margin-left: 100px">
+            Already added products
+            <div th:each="product : ${blank.getUsedProducts()}">
+                <span th:text="${product.getKey().getProductName() + ' ' + product.getValue()}"></span>
+            </div>
+        </div>
+        <input type="submit" value="Save receipt"/>
+    </form>
+    <br>
+    Add product
+    <br>
+    <br>
+    <form th:method="POST" th:action="@{/receipts/add-product}" th:object="${newProduct}">
+        <label for = "product">Choose product</label>
+        <select th:object="${newProduct}" th:field = "*{productId}" id = "product">
+            <option th:each = "product : ${products}" th:value = "${product.getProductId()}"
+                    th:text = "${product.getProductName()}"></option>
+        </select>
+        <br>
+        <label for="quantity">Choose quantity</label>
+        <input type="text" th:field = "*{quantity}" id = "quantity"/>
+        <br>
+        <input type = "submit" value = "Add product"/>
+        <br>
+    </form>
+    </div>
+</div>
+</body>
+</html>

@@ -18,6 +18,7 @@
     <modules>
         <module>inventory-service</module>
         <module>receipt-service</module>
+        <module>client-service</module>
     </modules>
 
     <properties>
