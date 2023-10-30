@@ -5,6 +5,19 @@
     <title>Concrete receipt</title>
 </head>
 <body style="background: bisque">
-Concrete receipt
+<div>
+    <div style="width: 50%;  margin: 0 auto">
+        <p th:text="${receipt.getTitle()}"></p>
+        <br>
+        <span>Products</span>
+        <br>
+        <p th:each="product:${receipt.getUsedProducts()}"
+           th:text="${product.getKey().getProductName() + ' ' + product.getValue()}"></p>
+        <br>
+        <span>Actions</span>
+        <p th:text="${receipt.getActions()}"></p>
+    </div>
+</div>
+
 </body>
 </html>

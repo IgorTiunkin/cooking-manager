@@ -1,9 +1,6 @@
 package com.phantom.client.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +10,10 @@ import java.util.Map;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ReceiptDTO {
+
+    private Integer receiptId;
 
     private String title;
 

@@ -5,6 +5,14 @@
     <title>All receipts</title>
 </head>
 <body style="background: bisque">
-All receipts
+<div>
+    <div style="width: 50%;  margin: 0 auto">
+        <div th:each="receipt : ${receipts}">
+        <a th:text="${receipt.getTitle()}"
+        th:href="@{/receipts/receipt/{receipt-id} (receipt-id = ${receipt.getReceiptId()})}"></a>
+        <br>
+    </div>
+</div>
+
 </body>
 </html>

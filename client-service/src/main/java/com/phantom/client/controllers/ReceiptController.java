@@ -62,6 +62,7 @@ public class ReceiptController {
     @PostMapping("/save")
     public String save(@ModelAttribute ("blank") ReceiptDTO receiptDTO) {
         System.out.println(receiptDTO);
+        receiptService.save(receiptDTO);
         return "redirect:/receipts/all";
     }
 
