@@ -1,4 +1,4 @@
-package com.phantom.controllers;
+package com.phantom.inventory.controllers;
 
 import com.phantom.inventory.controllers.ProductController;
 import com.phantom.inventory.dto.ProductDTO;

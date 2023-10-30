@@ -18,12 +18,12 @@ public class Product {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int productId;
+    private Integer productId;
 
     @Column(name = "product_name")
     private String productName;
 
     @Column(name = "calories")
-    private int calories;
+    private Integer calories;
 
 }

@@ -1,4 +1,4 @@
-package com.phantom.controllers;
+package com.phantom.receipt.controllers;
 
 import com.phantom.receipt.controllers.ReceiptController;
 import com.phantom.receipt.dto.ReceiptDTO;

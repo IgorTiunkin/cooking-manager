@@ -2,9 +2,7 @@ package com.phantom.client.dto;
 
 import lombok.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Getter
 @Setter
@@ -17,7 +15,8 @@ public class ReceiptDTO {
 
     private String title;
 
-    private Map<ProductDTO, Integer> usedProducts = new HashMap<>();//todo convert to linked map
+    private TreeMap<ProductDTO, Integer> usedProducts =
+            new TreeMap<>(Comparator.comparing(ProductDTO::getProductName));//todo convert to linked map
 
     private String actions;
 

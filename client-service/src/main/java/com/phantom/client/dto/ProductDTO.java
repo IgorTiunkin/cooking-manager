@@ -2,7 +2,8 @@ package com.phantom.client.dto;
 
 import lombok.*;
 
-import java.io.Serializable;
+import java.util.Comparator;
+
 
 @Getter
 @Setter
@@ -10,18 +11,23 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode
-public class ProductDTO {
+public class ProductDTO implements Comparable <ProductDTO> {
 
-    private int productId;
+    private Integer productId;
 
     private String productName;
 
-    private int calories;
+    private Integer calories;
 
     @Override
     public String toString() {
         return  "productName='" + productName + '\'' +
                 ", calories=" + calories +
                 '}';
+    }
+
+    @Override
+    public int compareTo(ProductDTO o) {
+        return this.getProductName().compareTo(o.getProductName());
     }
 }

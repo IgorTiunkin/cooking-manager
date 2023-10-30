@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ProductInStockDTO {
 
-    private int stockId;
+    private Integer stockId;
 
-    private int quantity;
+    private Integer quantity;
 }

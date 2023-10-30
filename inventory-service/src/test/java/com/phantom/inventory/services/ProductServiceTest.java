@@ -1,4 +1,4 @@
-package com.phantom.services;
+package com.phantom.inventory.services;
 
 import com.phantom.inventory.models.Product;
 import com.phantom.inventory.services.ProductService;

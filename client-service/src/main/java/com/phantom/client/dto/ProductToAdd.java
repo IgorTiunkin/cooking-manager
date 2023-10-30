@@ -10,6 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductToAdd {
-    private int productId;
-    private int quantity;
+    private Integer productId;
+    private Integer quantity;
 }

@@ -18,12 +18,12 @@ public class ProductInStock {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private int stockId;
+    private Integer stockId;
 
     @OneToOne
     @JoinColumn (name = "product_id", referencedColumnName = "id")
     private Product product;
 
     @Column(name = "quantity")
-    private int quantity;
+    private Integer quantity;
 }

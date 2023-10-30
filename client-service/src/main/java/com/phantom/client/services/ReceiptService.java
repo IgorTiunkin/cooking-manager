@@ -3,15 +3,18 @@ package com.phantom.client.services;
 import com.phantom.client.dto.ProductDTO;
 import com.phantom.client.dto.ProductToAdd;
 import com.phantom.client.dto.ReceiptDTO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ReceiptService {
+
+    private final WebClient.Builder builder;
 
     public List<ReceiptDTO> getAllReceipts() {
         ProductDTO productDTO1 = ProductDTO.builder()
@@ -24,7 +27,7 @@ public class ReceiptService {
                 .productName("bread")
                 .calories(200)
                 .build();
-        Map<ProductDTO, Integer> receiptDTOIntegerMap = new HashMap<>();
+        TreeMap<ProductDTO, Integer> receiptDTOIntegerMap = new TreeMap<>();
         receiptDTOIntegerMap.put(productDTO1, 2);
         receiptDTOIntegerMap.put(productDTO2, 3);
         ReceiptDTO receiptDTO = ReceiptDTO.builder()
@@ -47,7 +50,7 @@ public class ReceiptService {
                 .productName("bread")
                 .calories(200)
                 .build();
-        Map<ProductDTO, Integer> receiptDTOIntegerMap = new HashMap<>();
+        TreeMap<ProductDTO, Integer> receiptDTOIntegerMap = new TreeMap<>();
         receiptDTOIntegerMap.put(productDTO1, 2);
         receiptDTOIntegerMap.put(productDTO2, 3);
         ReceiptDTO receiptDTO = ReceiptDTO.builder()
@@ -60,17 +63,15 @@ public class ReceiptService {
     }
 
     public List <ProductDTO> getAllProducts() {
-        ProductDTO productDTO1 = ProductDTO.builder()
-                .productId(1)
-                .productName("water")
-                .calories(10)
-                .build();
-        ProductDTO productDTO2 = ProductDTO.builder()
-                .productId(2)
-                .productName("bread")
-                .calories(200)
-                .build();
-        return List.of(productDTO1, productDTO2);//todo get from service
+
+        ProductDTO[] productDTOS = builder.build().get()
+                .uri("http://localhost:8081/api/v1/product/all")
+                .retrieve()
+                .bodyToMono(ProductDTO[].class)
+                .block();
+        List<ProductDTO> productDTOList = Arrays.stream(productDTOS).collect(Collectors.toList());
+        productDTOList.sort(Comparator.comparing(ProductDTO::getProductName));
+        return productDTOList;
     }
 
     public boolean save(ReceiptDTO receiptDTO) {

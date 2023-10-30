@@ -1,11 +1,11 @@
-package com.phantom.receipt.config;
+package com.phantom.inventory.config;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ReceiptConfigurationConfiguration {
+public class InventoryConfiguration {
 
     @Bean
     public ModelMapper modelMapper () {
