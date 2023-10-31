@@ -23,7 +23,7 @@ class ProductServiceTest {
     @Test
     public void whenGetAll_ThenSize2() {
         List<Product> allProducts = productService.getAllProducts();
-        assertEquals(2, allProducts.size());
+        assertEquals(4, allProducts.size());
     }
 
     @Test

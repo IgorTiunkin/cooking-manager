@@ -65,7 +65,7 @@ public class ReceiptService {
     public List <ProductDTO> getAllProducts() {
 
         ProductDTO[] productDTOS = builder.build().get()
-                .uri("http://localhost:8081/api/v1/product/all")
+                .uri("http://inventory-service/api/v1/product/all")
                 .retrieve()
                 .bodyToMono(ProductDTO[].class)
                 .block();
