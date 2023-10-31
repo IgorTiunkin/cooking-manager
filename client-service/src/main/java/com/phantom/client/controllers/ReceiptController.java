@@ -3,12 +3,15 @@ package com.phantom.client.controllers;
 import com.phantom.client.dto.ProductDTO;
 import com.phantom.client.dto.ProductToAdd;
 import com.phantom.client.dto.ReceiptDTO;
+import com.phantom.client.exceptions.ProductsServiceNotAvailableException;
 import com.phantom.client.services.ReceiptService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +31,7 @@ public class ReceiptController {
         return "receipts/all";
     }
 
+
     @GetMapping("/receipt/{receipt-id}")
     public String getReceipt (@PathVariable("receipt-id") Integer receiptId, Model model) {
         ReceiptDTO receiptById = receiptService.getReceiptById(receiptId);
@@ -35,7 +39,9 @@ public class ReceiptController {
         return "receipts/receipt";
     }
 
+
     @GetMapping("/create")
+    @CircuitBreaker(name = "inventory", fallbackMethod = "failedGetProducts")
     public String getCreationBlank(Model model) {
         List<ProductDTO> allProducts = receiptService.getAllProducts();
         model.addAttribute("blank", new ReceiptDTO());
@@ -43,6 +49,11 @@ public class ReceiptController {
         model.addAttribute("newProduct", new ProductToAdd());
         return "receipts/create";
     }
+
+    public String failedGetProducts (Model model, RuntimeException exception){
+        return "receipts/errors/ProductsNotFound";
+    }
+
 
     @PostMapping("/add-product")
     public String addProduct(@ModelAttribute ("newProduct") ProductToAdd productToAdd,
