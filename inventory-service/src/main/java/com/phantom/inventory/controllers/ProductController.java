@@ -4,6 +4,7 @@ import com.phantom.inventory.dto.ProductDTO;
 import com.phantom.inventory.models.Product;
 import com.phantom.inventory.services.ProductService;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,9 @@ public class ProductController {
 
     @GetMapping ("/all")
     @ResponseStatus(HttpStatus.OK)
+    //@SneakyThrows
     public List<ProductDTO> getAllProducts() {
+        //Thread.sleep(10000);
         List<Product> allProducts = productService.getAllProducts();
         return allProducts.stream().map(this::convertToProductDTO).collect(Collectors.toList());
     }

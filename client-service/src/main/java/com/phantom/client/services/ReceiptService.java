@@ -1,15 +1,22 @@
 package com.phantom.client.services;
 
 import com.phantom.client.dto.ProductDTO;
-import com.phantom.client.dto.ProductToAdd;
 import com.phantom.client.dto.ReceiptDTO;
+import com.phantom.client.exceptions.ProductsServiceNotAvailableException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -66,15 +73,19 @@ public class ReceiptService {
 
 
 
-    public List <ProductDTO> getAllProducts() {
-        ProductDTO[] productDTOS = builder.build().get()
+    @CircuitBreaker(name = "inventory")
+    @Retry(name = "inventory", fallbackMethod = "failedGetProducts")
+    public List <ProductDTO> getAllProducts(){
+        return builder.build().get()
                 .uri("http://api-gateway/api/v1/product/all")
                 .retrieve()
-                .bodyToMono(ProductDTO[].class)
+                .bodyToFlux(ProductDTO.class)
+                .collectSortedList(Comparator.comparing(ProductDTO::getProductName))
                 .block();
-        List<ProductDTO> productDTOList = Arrays.stream(productDTOS).collect(Collectors.toList());
-        productDTOList.sort(Comparator.comparing(ProductDTO::getProductName));
-        return productDTOList;
+    }
+
+    public List <ProductDTO> failedGetProducts (RuntimeException e) {
+        throw new ProductsServiceNotAvailableException("Service is unavailable");
     }
 
 

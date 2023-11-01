@@ -6,15 +6,15 @@ import com.phantom.client.dto.ReceiptDTO;
 import com.phantom.client.exceptions.ProductsServiceNotAvailableException;
 import com.phantom.client.services.ReceiptService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 @Controller
 @RequestMapping("/receipts")
@@ -41,7 +41,6 @@ public class ReceiptController {
 
 
     @GetMapping("/create")
-    @CircuitBreaker(name = "inventory", fallbackMethod = "failedGetProducts")
     public String getCreationBlank(Model model) {
         List<ProductDTO> allProducts = receiptService.getAllProducts();
         model.addAttribute("blank", new ReceiptDTO());
@@ -50,7 +49,8 @@ public class ReceiptController {
         return "receipts/create";
     }
 
-    public String failedGetProducts (Model model, RuntimeException exception){
+    @ExceptionHandler (ProductsServiceNotAvailableException.class)
+    public String failedGetProducts (ProductsServiceNotAvailableException exception){
         return "receipts/errors/ProductsNotFound";
     }
 
