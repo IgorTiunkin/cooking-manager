@@ -30,9 +30,11 @@ public class ProductController {
 
     @GetMapping ("/all")
     @ResponseStatus(HttpStatus.OK)
-    //@SneakyThrows
+    @SneakyThrows
     public List<ProductDTO> getAllProducts() {
-        //Thread.sleep(10000);
+        System.out.println("Start wait");
+        Thread.sleep(5000);
+        System.out.println("End wait");
         List<Product> allProducts = productService.getAllProducts();
         return allProducts.stream().map(this::convertToProductDTO).collect(Collectors.toList());
     }

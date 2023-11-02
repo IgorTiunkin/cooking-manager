@@ -7,20 +7,18 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReceiptService {
 
     private final WebClient.Builder builder;
@@ -75,16 +73,18 @@ public class ReceiptService {
 
     @CircuitBreaker(name = "inventory")
     @Retry(name = "inventory", fallbackMethod = "failedGetProducts")
-    public List <ProductDTO> getAllProducts(){
-        return builder.build().get()
+    @TimeLimiter(name = "inventory", fallbackMethod = "failedGetProducts")
+    public CompletableFuture <List <ProductDTO>> getAllProducts(){
+        return CompletableFuture.supplyAsync( () -> builder.build().get()
                 .uri("http://api-gateway/api/v1/product/all")
                 .retrieve()
                 .bodyToFlux(ProductDTO.class)
                 .collectSortedList(Comparator.comparing(ProductDTO::getProductName))
-                .block();
+                .block());
     }
 
-    public List <ProductDTO> failedGetProducts (RuntimeException e) {
+    public CompletableFuture <List <ProductDTO>> failedGetProducts (Exception exception) {
+        log.info("Fallback method activated, {}", exception.getMessage());
         throw new ProductsServiceNotAvailableException("Service is unavailable");
     }
 

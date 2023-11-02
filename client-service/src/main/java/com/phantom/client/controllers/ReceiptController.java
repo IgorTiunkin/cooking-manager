@@ -8,6 +8,7 @@ import com.phantom.client.services.ReceiptService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,11 +16,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 @Controller
 @RequestMapping("/receipts")
 @SessionAttributes({"products", "blank"})
 @RequiredArgsConstructor
+@Slf4j
 public class ReceiptController {
 
     private final ReceiptService receiptService;
@@ -41,8 +44,8 @@ public class ReceiptController {
 
 
     @GetMapping("/create")
-    public String getCreationBlank(Model model) {
-        List<ProductDTO> allProducts = receiptService.getAllProducts();
+    public String getCreationBlank(Model model) throws ExecutionException, InterruptedException {
+        List<ProductDTO> allProducts = receiptService.getAllProducts().get();
         model.addAttribute("blank", new ReceiptDTO());
         model.addAttribute("products", allProducts);
         model.addAttribute("newProduct", new ProductToAdd());
@@ -50,7 +53,8 @@ public class ReceiptController {
     }
 
     @ExceptionHandler (ProductsServiceNotAvailableException.class)
-    public String failedGetProducts (ProductsServiceNotAvailableException exception){
+    public String failedGetProducts (RuntimeException exception){
+        log.info("Get exception while calling Inventory service, {}", exception.getMessage());
         return "receipts/errors/ProductsNotFound";
     }
 
