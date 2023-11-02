@@ -3,10 +3,9 @@ package com.phantom.client.controllers;
 import com.phantom.client.dto.ProductDTO;
 import com.phantom.client.dto.ProductToAdd;
 import com.phantom.client.dto.ReceiptDTO;
-import com.phantom.client.exceptions.ProductsServiceNotAvailableException;
+import com.phantom.client.exceptions.InventoryServiceException;
+import com.phantom.client.exceptions.InventoryServiceTooManyRequestsException;
 import com.phantom.client.services.ReceiptService;
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
-import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 @Controller
 @RequestMapping("/receipts")
@@ -52,10 +50,11 @@ public class ReceiptController {
         return "receipts/create";
     }
 
-    @ExceptionHandler (ProductsServiceNotAvailableException.class)
-    public String failedGetProducts (RuntimeException exception){
+    @ExceptionHandler ({InventoryServiceException.class, InventoryServiceTooManyRequestsException.class})
+    public String failedGetProducts (Model model, RuntimeException exception){
         log.info("Get exception while calling Inventory service, {}", exception.getMessage());
-        return "receipts/errors/ProductsNotFound";
+        model.addAttribute("exceptionMessage", exception.getMessage());
+        return "receipts/errors/inventory_service_error";
     }
 
 
