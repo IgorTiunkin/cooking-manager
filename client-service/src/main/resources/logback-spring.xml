@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
-    <appender name="logstash" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>localhost:5000</destination>
+
+    <property name="ApplicationName" value="client-service"/>
+
+
+    <property name="LOG_DIR" value="./client-service/logs" />
+    <appender name="File" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_DIR}/${ApplicationName}-logs.log</file>
+        <append>true</append>
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
                 <mdc />
@@ -12,7 +18,7 @@
                 <pattern>
                     <pattern>
                         {
-                        "appName": "client-service"
+                        "appName": "${ApplicationName}"
                         }
                     </pattern>
                 </pattern>
@@ -23,7 +29,9 @@
             </providers>
         </encoder>
     </appender>
+
     <root level="info">
-        <appender-ref ref="logstash" />
+        <appender-ref ref="File" />
     </root>
+
 </configuration>
