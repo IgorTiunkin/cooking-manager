@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Header</title>
+</head>
+<body style="background: bisque">
+<div th:fragment="recipe_header" class="">
+    <div>
+        <div style="width: 50%;  margin: 0 auto; font-size: 18px">
+            <span>Навигация по разделам</span>
+            <nav>
+                <a th:href="@{/recipe}" th:text="'Main page'" style="text-decoration: none;"></a> |
+                <a th:href="@{/recipe/all}" th:text="'All recepies'" style="text-decoration: none;"></a> |
+                <a th:href="@{/recipe/create}" th:text="'Create recipe'" style="text-decoration: none;"></a>
+            </nav> <br>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

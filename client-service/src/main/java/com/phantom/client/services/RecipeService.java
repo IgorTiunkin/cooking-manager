@@ -1,7 +1,7 @@
 package com.phantom.client.services;
 
 import com.phantom.client.dto.ProductDTO;
-import com.phantom.client.dto.ReceiptDTO;
+import com.phantom.client.dto.RecipeDTO;
 import com.phantom.client.exceptions.InventoryServiceCircuitException;
 import com.phantom.client.exceptions.InventoryServiceException;
 import com.phantom.client.exceptions.InventoryServiceTimeoutException;
@@ -15,7 +15,6 @@ import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -28,11 +27,11 @@ import java.util.concurrent.TimeoutException;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ReceiptService {
+public class RecipeService {
 
     private final WebClient.Builder builder;
 
-    public List<ReceiptDTO> getAllReceipts() {
+    public List<RecipeDTO> getAllRecipes() {
         ProductDTO productDTO1 = ProductDTO.builder()
                 .productId(1)
                 .productName("water")
@@ -46,16 +45,16 @@ public class ReceiptService {
         TreeMap<ProductDTO, Integer> receiptDTOIntegerMap = new TreeMap<>();
         receiptDTOIntegerMap.put(productDTO1, 2);
         receiptDTOIntegerMap.put(productDTO2, 3);
-        ReceiptDTO receiptDTO = ReceiptDTO.builder()
-                .receiptId(1)
+        RecipeDTO recipeDTO = RecipeDTO.builder()
+                .recipeId(1)
                 .title("Bread with water")
                 .actions("Mix.Eat")
                 .usedProducts(receiptDTOIntegerMap)
                 .build();
-        return List.of(receiptDTO, receiptDTO);//todo get from service
+        return List.of(recipeDTO, recipeDTO);//todo get from service
     }
 
-    public ReceiptDTO getReceiptById(Integer receiptId) {
+    public RecipeDTO getRecipeById(Integer receiptId) {
         ProductDTO productDTO1 = ProductDTO.builder()
                 .productId(1)
                 .productName("water")
@@ -69,13 +68,13 @@ public class ReceiptService {
         TreeMap<ProductDTO, Integer> receiptDTOIntegerMap = new TreeMap<>();
         receiptDTOIntegerMap.put(productDTO1, 2);
         receiptDTOIntegerMap.put(productDTO2, 3);
-        ReceiptDTO receiptDTO = ReceiptDTO.builder()
-                .receiptId(1)
+        RecipeDTO recipeDTO = RecipeDTO.builder()
+                .recipeId(1)
                 .title("Bread with water")
                 .actions("Mix.Eat")
                 .usedProducts(receiptDTOIntegerMap)
                 .build();
-        return receiptDTO; //todo get from service
+        return recipeDTO; //todo get from service
     }
 
 
@@ -118,7 +117,7 @@ public class ReceiptService {
 
 
 
-    public boolean save(ReceiptDTO receiptDTO) {
+    public boolean save(RecipeDTO recipeDTO) {
         return true;//todo save to service
     }
 }

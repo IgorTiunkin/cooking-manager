@@ -5,11 +5,12 @@
     <title>All receipts</title>
 </head>
 <body style="background: bisque">
+<div th:replace="allheaders::recipe_header"></div>
 <div>
     <div style="width: 50%;  margin: 0 auto">
-        <div th:each="receipt : ${receipts}">
-        <a th:text="${receipt.getTitle()}"
-        th:href="@{/receipts/receipt/{receipt-id} (receipt-id = ${receipt.getReceiptId()})}"></a>
+        <div th:each="recipe : ${recipes}">
+        <a th:text="${recipe.getTitle()}"
+        th:href="@{/recipe/recipe/{recipe-id} (recipe-id = ${recipe.getRecipeId()})}"></a>
         <br>
     </div>
 </div>

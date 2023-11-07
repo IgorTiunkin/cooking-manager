@@ -19,10 +19,11 @@
     </style>
 </head>
 <body style="background: bisque">
+<div th:replace="allheaders::recipe_header"></div>
 <div>
     <div style="width: 50%;  margin: 0 auto">
-    <form th:method="POST" th:action="@{/receipts/save}" th:object="${blank}">
-        <label for="title">Choose receipt name</label>
+    <form th:method="POST" th:action="@{/recipe/save}" th:object="${blank}">
+        <label for="title">Choose recipe name</label>
         <input type="text" th:field = "*{title}" id = "title"/>
         <div th:if="${#fields.hasErrors('title')}" style="color: red" th:errors = "*{title}" ></div>
         <br>
@@ -42,7 +43,7 @@
     Add product
     <br>
     <br>
-    <form th:method="POST" th:action="@{/receipts/add-product}" th:object="${newProduct}">
+    <form th:method="POST" th:action="@{/recipe/add-product}" th:object="${newProduct}">
         <label for = "product">Choose product</label>
         <select th:object="${newProduct}" th:field = "*{productId}" id = "product">
             <option th:each = "product : ${products}" th:value = "${product.getProductId()}"

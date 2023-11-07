@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome</title>
+</head>
+<body style="background: bisque">
+<div th:replace="allheaders::recipe_header"></div>
+<div>
+    <div style="width: 50%;  margin: 0 auto">
+        <p th:text="'Welcome to our cooking manager'"></p>
+        <br>
+        <a th:href="@{/recipe/all}" th:text="'View all receipts'"></a>
+        <br>
+        <a th:href="@{/recipe/create}" th:text="'Create new recipe'"></a>
+    </div>
+</div>
+
+</body>
+</html>

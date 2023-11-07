@@ -5,17 +5,18 @@
     <title>Concrete receipt</title>
 </head>
 <body style="background: bisque">
+<div th:replace="allheaders::recipe_header"></div>
 <div>
     <div style="width: 50%;  margin: 0 auto">
-        <p th:text="${receipt.getTitle()}"></p>
+        <p th:text="${recipe.getTitle()}"></p>
         <br>
         <span>Products</span>
         <br>
-        <p th:each="product:${receipt.getUsedProducts()}"
+        <p th:each="product:${recipe.getUsedProducts()}"
            th:text="${product.getKey().getProductName() + ' ' + product.getValue()}"></p>
         <br>
         <span>Actions</span>
-        <p th:text="${receipt.getActions()}"></p>
+        <p th:text="${recipe.getActions()}"></p>
     </div>
 </div>
 

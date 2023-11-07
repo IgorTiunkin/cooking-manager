@@ -5,9 +5,11 @@
     <title>Error</title>
 </head>
 <body style="background: bisque">
+<div th:replace="allheaders::recipe_header"></div>
 <div>
     <div style="width: 50%;  margin: 0 auto">
         <p th:text="${exceptionMessage}"></p>
     </div>
+</div>
 </body>
 </html>

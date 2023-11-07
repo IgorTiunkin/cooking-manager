@@ -11,9 +11,9 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReceiptDTO {
+public class RecipeDTO {
 
-    private Integer receiptId;
+    private Integer recipeId;
 
     @NotEmpty(message = "Title should not be empty")
     @Size(max = 100, message = "Title should not be over 100 characters")
