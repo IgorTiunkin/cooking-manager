@@ -1,6 +1,6 @@
 package com.phantom.recipe.services;
 
-import com.phantom.recipe.dto.RecipeRestElementOfListDTO;
+import com.phantom.recipe.dto.RecipeRestDTO;
 import com.phantom.recipe.mappers.RecipeDTOMapper;
 import com.phantom.recipe.repositories.RecipeRepository;
 import com.phantom.recipe.models.Recipe;
@@ -19,9 +19,9 @@ public class RecipeService {
     private final RecipeDTOMapper recipeDTOMapper;
 
 
-    public List<RecipeRestElementOfListDTO> getAllRecipes() {
+    public List<RecipeRestDTO> getAllRecipes() {
         List<Recipe> recipeList = recipeRepository.findAll();
-        return recipeDTOMapper.mapToRecipeRestListDTOList(recipeList);
+        return recipeDTOMapper.mapToRecipeRestDTOList(recipeList);
     }
 
     @Transactional

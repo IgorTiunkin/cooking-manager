@@ -1,13 +1,13 @@
 package com.phantom.client.mappers;
 
+import com.phantom.client.dto.ProductAndQuantityDTO;
 import com.phantom.client.dto.ProductDTO;
-import com.phantom.client.dto.RecipeDTO;
+import com.phantom.client.dto.RecipeShowDTO;
 import com.phantom.client.dto.RecipeRestDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -15,17 +15,24 @@ import java.util.stream.Collectors;
 public class RecipeRestToDtoMapper {
 
 
-    public List <RecipeDTO> mapToRecipeDto(List<RecipeRestDTO> recipeRestDTOS) {
+    public List <RecipeShowDTO> mapToRecipeDto(List<RecipeRestDTO> recipeRestDTOS) {
         return recipeRestDTOS.stream().map(this::convertToRecipeDto).collect(Collectors.toList());
 
     }
 
-    private RecipeDTO convertToRecipeDto(RecipeRestDTO recipeRestDTO) {
-        Map<ProductDTO, Integer> usedProducts = recipeRestDTO.getUsedProducts();
+    private RecipeShowDTO convertToRecipeDto(RecipeRestDTO recipeRestDTO) {
+        List<ProductAndQuantityDTO> productAndQuantityDTOList = recipeRestDTO.getProductAndQuantityDTOList();
         TreeMap <ProductDTO, Integer> treeUsedProducts =
                 new TreeMap<>(Comparator.comparing(ProductDTO::getProductName));
-        usedProducts.entrySet().stream().forEach(entry -> treeUsedProducts.put(entry.getKey(), entry.getValue()));
-        return RecipeDTO.builder().recipeId(recipeRestDTO.getRecipeId())
+        productAndQuantityDTOList.stream()
+                .forEach(entry -> treeUsedProducts.put(
+                        ProductDTO.builder()
+                        .productId(entry.getProductId())
+                        .productName(entry.getProductName())
+                        .calories(entry.getCalories())
+                        .build()
+                        , entry.getQuantity()));
+        return RecipeShowDTO.builder().recipeId(recipeRestDTO.getRecipeId())
                 .title(recipeRestDTO.getTitle())
                 .actions(recipeRestDTO.getActions())
                 .usedProducts(treeUsedProducts)

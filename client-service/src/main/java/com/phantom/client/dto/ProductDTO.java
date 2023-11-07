@@ -19,9 +19,12 @@ public class ProductDTO implements Comparable <ProductDTO> {
 
     private Integer calories;
 
+
     @Override
     public String toString() {
-        return  "productName='" + productName + '\'' +
+        return "ProductDTO{" +
+                "productId=" + productId +
+                ", productName='" + productName + '\'' +
                 ", calories=" + calories +
                 '}';
     }

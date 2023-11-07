@@ -1,5 +1,6 @@
 package com.phantom.client.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.phantom.client.dto.*;
 import com.phantom.client.exceptions.InventoryServiceException;
 import com.phantom.client.exceptions.InventoryServiceTooManyRequestsException;
@@ -42,8 +43,8 @@ public class RecipeController {
 
 
     @GetMapping("/all")
-    public String getAllRecipes(Model model) throws ExecutionException, InterruptedException {
-        List<RecipeRestElementOfListDTO> recipeRestDTOS = recipeService.getAllRecipes().get();
+    public String getAllRecipes(Model model) throws ExecutionException, InterruptedException, JsonProcessingException {
+        List<RecipeRestDTO> recipeRestDTOS = recipeService.getAllRecipes().get();
         model.addAttribute("recipes", recipeRestDTOS);
         return RECIPE_ALL_VIEW;
     }
@@ -51,7 +52,7 @@ public class RecipeController {
 
     @GetMapping("/recipe/{recipe-id}")
     public String getRecipe(@PathVariable("recipe-id") Integer recipeId, Model model) {
-        RecipeDTO recipeById = recipeService.getRecipeById(recipeId);
+        RecipeShowDTO recipeById = recipeService.getRecipeById(recipeId);
         model.addAttribute("recipe", recipeById);
         return RECIPE_VIEW;
     }
@@ -60,7 +61,7 @@ public class RecipeController {
     @GetMapping("/create")
     public String getCreationBlank(Model model) throws ExecutionException, InterruptedException {
         List<ProductDTO> allProducts = inventoryService.getAllProducts().get();
-        model.addAttribute("blank", new RecipeDTO());
+        model.addAttribute("blank", new RecipeShowDTO());
         model.addAttribute("products", allProducts);
         model.addAttribute("newProduct", new ProductToAdd());
         return RECIPE_CREATE_VIEW;
@@ -77,14 +78,14 @@ public class RecipeController {
     @PostMapping("/add-product")
     public String addProduct(@ModelAttribute ("newProduct") @Valid ProductToAdd productToAdd,
                              BindingResult bindingResult,
-                             @ModelAttribute ("blank") RecipeDTO recipeDTO,
+                             @ModelAttribute ("blank") RecipeShowDTO recipeShowDTO,
                              @ModelAttribute ("products") List <ProductDTO> productDTOList,
                              Model model) {
         if (bindingResult.hasErrors()) {
             log.info("Wrong request on adding product. {}", bindingResult.getFieldErrors());
             return RECIPE_CREATE_VIEW;
         }
-        Map<ProductDTO, Integer> usedProducts = recipeDTO.getUsedProducts();
+        Map<ProductDTO, Integer> usedProducts = recipeShowDTO.getUsedProducts();
         ProductDTO productToAddDTO = productDTOList.stream()
                 .filter(productDTO -> productDTO.getProductId().equals(productToAdd.getProductId()))
                 .findAny().get();
@@ -96,7 +97,7 @@ public class RecipeController {
     }
 
     @PostMapping("/save")
-    public String save(@ModelAttribute ("blank") @Valid RecipeDTO recipeDTO,
+    public String save(@ModelAttribute ("blank") @Valid RecipeShowDTO recipeShowDTO,
                        BindingResult bindingResult,
                        Model model) {
         if (bindingResult.hasErrors()){
@@ -104,8 +105,8 @@ public class RecipeController {
             model.addAttribute("newProduct", new ProductToAdd());
             return RECIPE_CREATE_VIEW;
         }
-        recipeService.save(recipeDTO);
-        log.info("Receipt successfully created. {}", recipeDTO);
+        recipeService.save(recipeShowDTO);
+        log.info("Receipt successfully created. {}", recipeShowDTO);
         return "redirect:/recipe/all";
     }
 

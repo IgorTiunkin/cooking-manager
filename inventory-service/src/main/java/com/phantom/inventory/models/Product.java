@@ -26,4 +26,12 @@ public class Product {
     @Column(name = "calories")
     private Integer calories;
 
+    @Override
+    public String toString() {
+        return "Product{" +
+                "productId=" + productId +
+                ", productName='" + productName + '\'' +
+                ", calories=" + calories +
+                '}';
+    }
 }

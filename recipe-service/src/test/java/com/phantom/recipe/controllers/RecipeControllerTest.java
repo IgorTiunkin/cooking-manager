@@ -1,8 +1,14 @@
 package com.phantom.recipe.controllers;
 
+import com.phantom.recipe.dto.RecipeRestDTO;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class RecipeControllerTest {
@@ -14,17 +20,17 @@ class RecipeControllerTest {
         this.recipeController = recipeController;
     }
 
-   /* @Test
+   @Test
     public void whenAll_then1() {
-        List<Recipe> allReceipts = recipeController.getAllRecipes();
+        List<RecipeRestDTO> allReceipts = recipeController.getAllRecipes();
         assertEquals(1, allReceipts.size());
-    }*/
+    }
 
-   /* @Test
+    @Test
     public void when1_thenSalad() {
-        RecipeDTO receiptById = recipeController.getRecipeById(1);
+        RecipeRestDTO receiptById = recipeController.getRecipeById(1);
         assertEquals("Salad", receiptById.getTitle());
-    }*/
+    }
 
 
 }

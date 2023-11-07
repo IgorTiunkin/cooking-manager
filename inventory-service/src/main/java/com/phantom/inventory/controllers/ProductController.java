@@ -33,7 +33,6 @@ public class ProductController {
 
     @GetMapping ("/all")
     @ResponseStatus(HttpStatus.OK)
-    @SneakyThrows
     public List<ProductDTO> getAllProducts() {
         List<Product> allProducts = productService.getAllProducts();
         return allProducts.stream().map(this::convertToProductDTO).collect(Collectors.toList());
@@ -46,7 +45,11 @@ public class ProductController {
     @GetMapping ("/in")
     @ResponseStatus(HttpStatus.OK)
     public List<ProductDTO> getProductsIn(@RequestParam ("recipeIds") Set <Integer> productIdList) {
+        System.out.println(productIdList);
         List<Product> productList = productService.getAllById(new ArrayList<>(productIdList));
-        return productList.stream().map(this::convertToProductDTO).collect(Collectors.toList());
+        System.out.println(productList);
+        List<ProductDTO> productDTOS = productList.stream().map(this::convertToProductDTO).collect(Collectors.toList());
+        System.out.println(productDTOS);
+        return productDTOS;
     }
 }

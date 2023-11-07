@@ -18,5 +18,4 @@ public class RecipeRestElementOfListDTO {
 
     private String title;
 
-
 }

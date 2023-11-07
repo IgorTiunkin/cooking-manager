@@ -11,7 +11,7 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RecipeDTO {
+public class RecipeShowDTO {
 
     private Integer recipeId;
 

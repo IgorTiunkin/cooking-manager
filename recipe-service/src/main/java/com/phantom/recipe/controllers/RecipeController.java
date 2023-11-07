@@ -19,8 +19,10 @@ public class RecipeController {
     private final ModelMapper modelMapper;
 
     @GetMapping("/all")
-    public List<RecipeRestElementOfListDTO> getAllRecipes() {
-        return recipeService.getAllRecipes();
+    public List<RecipeRestDTO> getAllRecipes() {
+        List<RecipeRestDTO> allRecipes = recipeService.getAllRecipes();
+        System.out.println(allRecipes);
+        return allRecipes;
     }
 
     @GetMapping("/one")

@@ -29,5 +29,13 @@ public class Recipe {
     @Column(name = "actions")
     private String actions;
 
-
+    @Override
+    public String toString() {
+        return "Recipe{" +
+                "recipeId=" + recipeId +
+                ", title='" + title + '\'' +
+                ", productIDsAndQuantities=" + productIDsAndQuantities +
+                ", actions='" + actions + '\'' +
+                '}';
+    }
 }
