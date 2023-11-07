@@ -10,8 +10,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -25,11 +27,16 @@ public class ReceiptController {
 
     private final ReceiptService receiptService;
 
+    private static final String RECEIPT_CREATE_VIEW = "receipts/create";
+    private static final String RECEIPT_ALL_VIEW = "receipts/all";
+    private static final String INVENTORY_SERVICE_ERROR_VIEW = "receipts/errors/inventory_service_error";
+    private static final String RECEIPT_VIEW = "receipts/receipt";
+
     @GetMapping("/all")
     public String getAllReceipts(Model model) {
         List<ReceiptDTO> allReceipts = receiptService.getAllReceipts();
         model.addAttribute("receipts", allReceipts);
-        return "receipts/all";
+        return RECEIPT_ALL_VIEW;
     }
 
 
@@ -37,7 +44,7 @@ public class ReceiptController {
     public String getReceipt (@PathVariable("receipt-id") Integer receiptId, Model model) {
         ReceiptDTO receiptById = receiptService.getReceiptById(receiptId);
         model.addAttribute("receipt", receiptById);
-        return "receipts/receipt";
+        return RECEIPT_VIEW;
     }
 
 
@@ -47,36 +54,49 @@ public class ReceiptController {
         model.addAttribute("blank", new ReceiptDTO());
         model.addAttribute("products", allProducts);
         model.addAttribute("newProduct", new ProductToAdd());
-        return "receipts/create";
+        return RECEIPT_CREATE_VIEW;
     }
 
     @ExceptionHandler ({InventoryServiceException.class, InventoryServiceTooManyRequestsException.class})
     public String failedGetProducts (Model model, RuntimeException exception){
         log.info("Get exception while calling Inventory service, {}", exception.getMessage());
         model.addAttribute("exceptionMessage", exception.getMessage());
-        return "receipts/errors/inventory_service_error";
+        return INVENTORY_SERVICE_ERROR_VIEW;
     }
 
 
     @PostMapping("/add-product")
-    public String addProduct(@ModelAttribute ("newProduct") ProductToAdd productToAdd,
+    public String addProduct(@ModelAttribute ("newProduct") @Valid ProductToAdd productToAdd,
+                             BindingResult bindingResult,
                              @ModelAttribute ("blank") ReceiptDTO receiptDTO,
-                             @ModelAttribute ("products") List <ProductDTO> productDTOList) {
+                             @ModelAttribute ("products") List <ProductDTO> productDTOList,
+                             Model model) {
+        if (bindingResult.hasErrors()) {
+            log.info("Wrong request on adding product. {}", bindingResult.getFieldErrors());
+            return RECEIPT_CREATE_VIEW;
+        }
         Map<ProductDTO, Integer> usedProducts = receiptDTO.getUsedProducts();
         ProductDTO productToAddDTO = productDTOList.stream()
-                .filter(productDTO -> productDTO.getProductId() == productToAdd.getProductId())
+                .filter(productDTO -> productDTO.getProductId().equals(productToAdd.getProductId()))
                 .findAny().get();
         usedProducts.put(productToAddDTO, productToAdd.getQuantity());
         if (productToAdd.getQuantity()==0) {
             usedProducts.remove(productToAddDTO);
         }
-        return "receipts/create";
+        return RECEIPT_CREATE_VIEW;
     }
 
     @PostMapping("/save")
-    public String save(@ModelAttribute ("blank") ReceiptDTO receiptDTO) {
-        System.out.println(receiptDTO);
+    public String save(@ModelAttribute ("blank") @Valid ReceiptDTO receiptDTO,
+                       BindingResult bindingResult,
+                       Model model) {
+        if (bindingResult.hasErrors()){
+            log.info("Wrong request on adding receipt {}", bindingResult.getFieldErrors());
+            model.addAttribute("newProduct", new ProductToAdd());
+            return RECEIPT_CREATE_VIEW;
+        }
         receiptService.save(receiptDTO);
+        log.info("Receipt successfully created. {}", receiptDTO);
         return "redirect:/receipts/all";
     }
 
