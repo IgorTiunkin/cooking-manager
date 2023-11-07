@@ -9,7 +9,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -40,4 +43,10 @@ public class ProductController {
         return modelMapper.map(product, ProductDTO.class);
     }
 
+    @GetMapping ("/in")
+    @ResponseStatus(HttpStatus.OK)
+    public List<ProductDTO> getProductsIn(@RequestParam ("recipeIds") Set <Integer> productIdList) {
+        List<Product> productList = productService.getAllById(new ArrayList<>(productIdList));
+        return productList.stream().map(this::convertToProductDTO).collect(Collectors.toList());
+    }
 }

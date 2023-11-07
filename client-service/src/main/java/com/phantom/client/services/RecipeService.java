@@ -2,6 +2,8 @@ package com.phantom.client.services;
 
 import com.phantom.client.dto.ProductDTO;
 import com.phantom.client.dto.RecipeDTO;
+import com.phantom.client.dto.RecipeRestDTO;
+import com.phantom.client.dto.RecipeRestElementOfListDTO;
 import com.phantom.client.exceptions.InventoryServiceCircuitException;
 import com.phantom.client.exceptions.InventoryServiceException;
 import com.phantom.client.exceptions.InventoryServiceTimeoutException;
@@ -31,27 +33,17 @@ public class RecipeService {
 
     private final WebClient.Builder builder;
 
-    public List<RecipeDTO> getAllRecipes() {
-        ProductDTO productDTO1 = ProductDTO.builder()
-                .productId(1)
-                .productName("water")
-                .calories(10)
-                .build();
-        ProductDTO productDTO2 = ProductDTO.builder()
-                .productId(2)
-                .productName("bread")
-                .calories(200)
-                .build();
-        TreeMap<ProductDTO, Integer> receiptDTOIntegerMap = new TreeMap<>();
-        receiptDTOIntegerMap.put(productDTO1, 2);
-        receiptDTOIntegerMap.put(productDTO2, 3);
-        RecipeDTO recipeDTO = RecipeDTO.builder()
-                .recipeId(1)
-                .title("Bread with water")
-                .actions("Mix.Eat")
-                .usedProducts(receiptDTOIntegerMap)
-                .build();
-        return List.of(recipeDTO, recipeDTO);//todo get from service
+    public CompletableFuture <List<RecipeRestElementOfListDTO>> getAllRecipes() {
+        return  CompletableFuture.supplyAsync(() ->
+                builder.build()
+                        .get()
+                        .uri("http://api-gateway/api/v1/recipe/all")
+                        .retrieve()
+                        .bodyToFlux(RecipeRestElementOfListDTO.class)
+                        .collectList()
+                        .block()
+        );
+
     }
 
     public RecipeDTO getRecipeById(Integer receiptId) {
@@ -77,47 +69,10 @@ public class RecipeService {
         return recipeDTO; //todo get from service
     }
 
-
-
-    @Retry(name = "inventory", fallbackMethod = "inventoryFail")
-    @CircuitBreaker(name = "inventory", fallbackMethod = "inventoryCircuit")
-    @TimeLimiter(name = "inventory", fallbackMethod = "inventoryTimeout")
-    @RateLimiter(name = "inventory", fallbackMethod = "inventoryTooManyRequests")
-    public CompletableFuture <List <ProductDTO>> getAllProducts(){
-        return CompletableFuture.supplyAsync( () -> builder.build().get()
-                .uri("http://api-gateway/api/v1/product/all")
-                .retrieve()
-                .bodyToFlux(ProductDTO.class)
-                .collectSortedList(Comparator.comparing(ProductDTO::getProductName))
-                .block());
-    }
-
-    public CompletableFuture <List <ProductDTO>> inventoryFail (Exception exception) {
-        log.info("Fallback method failedGetProducts activated, {}", exception.getMessage());
-        if (exception instanceof WebClientResponseException) {
-            throw new InventoryServiceException("Inventory service is unavailable. Please try later.");
-        }
-        throw new InventoryServiceException(exception.getMessage());
-    }
-
-    public CompletableFuture <List <ProductDTO>> inventoryCircuit (CallNotPermittedException exception) {
-        log.info("Fallback method circuitInventory activated, {}", exception.getMessage());
-        throw new InventoryServiceCircuitException("Inventory service is unavailable. Please try later.");
-    }
-
-    public CompletableFuture <List <ProductDTO>> inventoryTimeout (TimeoutException exception) {
-        log.info("Fallback method timeoutInventory activated, {}", exception.getMessage());
-        throw new InventoryServiceTimeoutException("Inventory service is unavailable. Please try later.");
-    }
-
-    public CompletableFuture <List <ProductDTO>> inventoryTooManyRequests (RequestNotPermitted exception) {
-        log.info("Fallback method tooManyRequestsToInventory activated, {}", exception.getMessage());
-        throw new InventoryServiceTooManyRequestsException("You have done too many requests to inventory. Please try later.");
-    }
-
-
-
     public boolean save(RecipeDTO recipeDTO) {
         return true;//todo save to service
     }
+
+
+
 }

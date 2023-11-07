@@ -17,7 +17,7 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>inventory-service</module>
-        <module>receipt-service</module>
+        <module>recipe-service</module>
         <module>client-service</module>
         <module>discovery-server</module>
         <module>api-gateway</module>

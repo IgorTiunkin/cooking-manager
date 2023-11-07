@@ -1,5 +1,6 @@
 package com.phantom.inventory.services;
 
+import com.phantom.inventory.dto.ProductDTO;
 import com.phantom.inventory.models.Product;
 import com.phantom.inventory.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -22,4 +24,5 @@ public class ProductService {
     public List <Product> getAllProducts() {
         return productRepository.findAll();
     }
+
 }

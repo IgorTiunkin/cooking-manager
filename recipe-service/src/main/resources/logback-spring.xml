@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <property name="ApplicationName" value="recipe-service"/>
+
+
+    <property name="LOG_DIR" value="./recipe-service/logs" />
+    <appender name="File" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_DIR}/${ApplicationName}-logs.log</file>
+        <append>true</append>
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <mdc />
+                <context />
+                <logLevel />
+                <loggerName />
+                <pattern>
+                    <pattern>
+                        {
+                        "appName": "${ApplicationName}"
+                        }
+                    </pattern>
+                </pattern>
+                <threadName />
+                <message />
+                <logstashMarkers />
+                <stackTrace />
+            </providers>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="File" />
+    </root>
+
+</configuration>

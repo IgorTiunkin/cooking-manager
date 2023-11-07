@@ -1,8 +1,7 @@
-package com.phantom.inventory.dto;
+package com.phantom.recipe.dto;
 
 import lombok.*;
 
-import javax.persistence.Column;
 
 @Getter
 @Setter
