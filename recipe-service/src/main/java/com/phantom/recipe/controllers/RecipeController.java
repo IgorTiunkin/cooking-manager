@@ -1,11 +1,12 @@
 package com.phantom.recipe.controllers;
 
 import com.phantom.recipe.dto.RecipeRestDTO;
-import com.phantom.recipe.dto.RecipeRestElementOfListDTO;
 import com.phantom.recipe.models.Recipe;
 import com.phantom.recipe.services.RecipeService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,25 +14,29 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/recipe")
 @RequiredArgsConstructor
+@Slf4j
 public class RecipeController {
 
     private final RecipeService recipeService;
     private final ModelMapper modelMapper;
 
     @GetMapping("/all")
+    @ResponseStatus(HttpStatus.OK)
     public List<RecipeRestDTO> getAllRecipes() {
+        log.info("Request all recipes");
         List<RecipeRestDTO> allRecipes = recipeService.getAllRecipes();
-        System.out.println(allRecipes);
         return allRecipes;
     }
 
     @GetMapping("/one")
+    @ResponseStatus(HttpStatus.OK)
     public RecipeRestDTO getRecipeById(@RequestParam ("recipeId") Integer recipeId) {
-        Recipe recipeById = recipeService.getRecipeById(recipeId);
-        return convertToRecipeRestDto(recipeById);
+        log.info("Request recipe # {}", recipeId);
+        return recipeService.getRecipeById(recipeId);
     }
 
     @PostMapping("/save")
+    @ResponseStatus(HttpStatus.CREATED)
     public RecipeRestDTO saveNewRecipe(@RequestBody RecipeRestDTO recipeDTO) {
         Recipe recipe = convertToRecipe(recipeDTO);
         boolean saved = recipeService.save(recipe);
@@ -43,6 +48,7 @@ public class RecipeController {
     }
 
     @DeleteMapping("/delete")
+    @ResponseStatus(HttpStatus.OK)
     public RecipeRestDTO deleteRecipe(@RequestBody RecipeRestDTO recipeRestDTO) {
         Recipe recipe = convertToRecipe(recipeRestDTO);
         boolean delete = recipeService.delete(recipe);

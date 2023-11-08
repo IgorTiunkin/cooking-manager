@@ -5,6 +5,7 @@ import com.phantom.recipe.mappers.RecipeDTOMapper;
 import com.phantom.recipe.repositories.RecipeRepository;
 import com.phantom.recipe.models.Recipe;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class RecipeService {
 
     private final RecipeRepository recipeRepository;
@@ -35,7 +37,9 @@ public class RecipeService {
         return true;
     }
 
-    public Recipe getRecipeById(int id) {
-        return recipeRepository.findById(id).orElseThrow(RuntimeException::new);//todo custom exception
+    public RecipeRestDTO getRecipeById(Integer recipeId) {
+        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(RuntimeException::new);//todo custom exception not found
+        log.info("Found recipe # {}",  recipeId);
+        return recipeDTOMapper.mapToRecipeRestDTOList(List.of(recipe)).get(0);
     }
 }

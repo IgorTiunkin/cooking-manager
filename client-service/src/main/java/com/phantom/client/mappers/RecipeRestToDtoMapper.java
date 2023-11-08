@@ -15,23 +15,23 @@ import java.util.stream.Collectors;
 public class RecipeRestToDtoMapper {
 
 
-    public List <RecipeShowDTO> mapToRecipeDto(List<RecipeRestDTO> recipeRestDTOS) {
-        return recipeRestDTOS.stream().map(this::convertToRecipeDto).collect(Collectors.toList());
+    public List <RecipeShowDTO> mapToRecipeShowDto(List<RecipeRestDTO> recipeRestDTOS) {
+        return recipeRestDTOS.stream().map(this::convertToRecipeShowDto).collect(Collectors.toList());
 
     }
 
-    private RecipeShowDTO convertToRecipeDto(RecipeRestDTO recipeRestDTO) {
+    private RecipeShowDTO convertToRecipeShowDto(RecipeRestDTO recipeRestDTO) {
         List<ProductAndQuantityDTO> productAndQuantityDTOList = recipeRestDTO.getProductAndQuantityDTOList();
         TreeMap <ProductDTO, Integer> treeUsedProducts =
                 new TreeMap<>(Comparator.comparing(ProductDTO::getProductName));
-        productAndQuantityDTOList.stream()
+        productAndQuantityDTOList
                 .forEach(entry -> treeUsedProducts.put(
                         ProductDTO.builder()
                         .productId(entry.getProductId())
                         .productName(entry.getProductName())
                         .calories(entry.getCalories())
                         .build()
-                        , entry.getQuantity()));
+                        ,entry.getQuantity()));
         return RecipeShowDTO.builder().recipeId(recipeRestDTO.getRecipeId())
                 .title(recipeRestDTO.getTitle())
                 .actions(recipeRestDTO.getActions())

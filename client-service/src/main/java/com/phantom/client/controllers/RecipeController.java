@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @Controller
@@ -43,17 +44,19 @@ public class RecipeController {
 
 
     @GetMapping("/all")
-    public String getAllRecipes(Model model) throws ExecutionException, InterruptedException, JsonProcessingException {
+    public String getAllRecipes(Model model) throws ExecutionException, InterruptedException{//todo catch
         List<RecipeRestDTO> recipeRestDTOS = recipeService.getAllRecipes().get();
-        model.addAttribute("recipes", recipeRestDTOS);
+        List<RecipeShowDTO> recipeShowDTOS = recipeRestToDtoMapper.mapToRecipeShowDto(recipeRestDTOS);
+        model.addAttribute("recipes", recipeShowDTOS);
         return RECIPE_ALL_VIEW;
     }
 
 
     @GetMapping("/recipe/{recipe-id}")
-    public String getRecipe(@PathVariable("recipe-id") Integer recipeId, Model model) {
-        RecipeShowDTO recipeById = recipeService.getRecipeById(recipeId);
-        model.addAttribute("recipe", recipeById);
+    public String getRecipe(@PathVariable("recipe-id") Integer recipeId, Model model) throws ExecutionException, InterruptedException {
+        RecipeRestDTO recipeRestDTO = recipeService.getRecipeById(recipeId).get();
+        RecipeShowDTO recipeShowDTO = recipeRestToDtoMapper.mapToRecipeShowDto(List.of(recipeRestDTO)).get(0);
+        model.addAttribute("recipe", recipeShowDTO);
         return RECIPE_VIEW;
     }
 

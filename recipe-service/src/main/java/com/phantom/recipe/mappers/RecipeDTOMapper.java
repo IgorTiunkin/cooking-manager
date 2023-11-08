@@ -3,7 +3,6 @@ package com.phantom.recipe.mappers;
 import com.phantom.recipe.dto.ProductAndQuantityDTO;
 import com.phantom.recipe.dto.ProductDTO;
 import com.phantom.recipe.dto.RecipeRestDTO;
-import com.phantom.recipe.dto.RecipeRestElementOfListDTO;
 import com.phantom.recipe.models.Recipe;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -26,8 +24,6 @@ public class RecipeDTOMapper {
     public List<RecipeRestDTO> mapToRecipeRestDTOList(List<Recipe> recipeList) {
         Set <Integer> recipeIds = new HashSet<>();
         recipeList.forEach(recipe -> recipeIds.addAll(recipe.getProductIDsAndQuantities().keySet()));
-        System.out.println(recipeList);
-        System.out.println(recipeIds);
         List<ProductDTO> productDTOS = webClientBuilder.build()
                 .get()
                 .uri("http://api-gateway/api/v1/product/in",
@@ -38,8 +34,6 @@ public class RecipeDTOMapper {
                 .block();
         Map<Integer, ProductDTO> productDTOMap =
                 productDTOS.stream().collect(Collectors.toMap(ProductDTO::getProductId, Function.identity()));
-
-        System.out.println(productDTOMap);
 
         return recipeList.stream().map(entry -> this.convertToRecipeRestDTO(entry, productDTOMap))
                 .collect(Collectors.toList());

@@ -5,6 +5,7 @@ import com.phantom.inventory.models.Product;
 import com.phantom.inventory.services.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/v1/product")
 @RequiredArgsConstructor
+@Slf4j
 public class ProductController {
 
     private final ProductService productService;
@@ -31,9 +33,12 @@ public class ProductController {
                 .collect(Collectors.toList());
     }
 
+
+
     @GetMapping ("/all")
     @ResponseStatus(HttpStatus.OK)
     public List<ProductDTO> getAllProducts() {
+        log.info("Requested all products");
         List<Product> allProducts = productService.getAllProducts();
         return allProducts.stream().map(this::convertToProductDTO).collect(Collectors.toList());
     }
@@ -45,11 +50,8 @@ public class ProductController {
     @GetMapping ("/in")
     @ResponseStatus(HttpStatus.OK)
     public List<ProductDTO> getProductsIn(@RequestParam ("recipeIds") Set <Integer> productIdList) {
-        System.out.println(productIdList);
+        log.info("Requested products in list");
         List<Product> productList = productService.getAllById(new ArrayList<>(productIdList));
-        System.out.println(productList);
-        List<ProductDTO> productDTOS = productList.stream().map(this::convertToProductDTO).collect(Collectors.toList());
-        System.out.println(productDTOS);
-        return productDTOS;
+        return productList.stream().map(this::convertToProductDTO).collect(Collectors.toList());
     }
 }

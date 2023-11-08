@@ -21,8 +21,8 @@ public class RecipeService {
 
     private final WebClient.Builder builder;
 
-    public CompletableFuture <List<RecipeRestDTO>> getAllRecipes() throws ExecutionException, InterruptedException, JsonProcessingException {
-        CompletableFuture<List<RecipeRestDTO>> listCompletableFuture = CompletableFuture.supplyAsync(() ->
+    public CompletableFuture <List<RecipeRestDTO>> getAllRecipes() throws ExecutionException, InterruptedException{
+        return CompletableFuture.supplyAsync(() ->
                 builder.build()
                         .get()
                         .uri("http://api-gateway/api/v1/recipe/all")
@@ -31,31 +31,18 @@ public class RecipeService {
                         .collectList()
                         .block()
         );
-        System.out.println(listCompletableFuture.get());
-        return listCompletableFuture;
     }
 
-    public RecipeShowDTO getRecipeById(Integer receiptId) {
-        ProductDTO productDTO1 = ProductDTO.builder()
-                .productId(1)
-                .productName("water")
-                .calories(10)
-                .build();
-        ProductDTO productDTO2 = ProductDTO.builder()
-                .productId(2)
-                .productName("bread")
-                .calories(200)
-                .build();
-        TreeMap<ProductDTO, Integer> receiptDTOIntegerMap = new TreeMap<>();
-        receiptDTOIntegerMap.put(productDTO1, 2);
-        receiptDTOIntegerMap.put(productDTO2, 3);
-        RecipeShowDTO recipeShowDTO = RecipeShowDTO.builder()
-                .recipeId(1)
-                .title("Bread with water")
-                .actions("Mix.Eat")
-                .usedProducts(receiptDTOIntegerMap)
-                .build();
-        return recipeShowDTO; //todo get from service
+    public CompletableFuture <RecipeRestDTO> getRecipeById(Integer recipeId) {
+        return CompletableFuture.supplyAsync( ()->
+                builder.build()
+                .get()
+                .uri("http://api-gateway/api/v1/recipe/one",
+                        uriBuilder -> uriBuilder.queryParam("recipeId", recipeId).build())
+                .retrieve()
+                .bodyToMono(RecipeRestDTO.class)
+                .block()
+        );
     }
 
     public boolean save(RecipeShowDTO recipeShowDTO) {
