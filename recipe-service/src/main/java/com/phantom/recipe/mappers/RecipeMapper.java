@@ -22,6 +22,6 @@ public class RecipeMapper {
                 .actions(recipeRestDTO.getActions())
                 .productIDsAndQuantities(productIDsAndQuantities)
                 .build();
-
     }
+
 }

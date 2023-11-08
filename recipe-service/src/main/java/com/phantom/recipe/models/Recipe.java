@@ -13,6 +13,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode (exclude = "recipeId")
 public class Recipe {
 
     @Id
@@ -24,7 +25,7 @@ public class Recipe {
     private String title;
 
     @ElementCollection (fetch = FetchType.EAGER)
-    private Map<Integer,Integer> productIDsAndQuantities;//todo refactor table
+    private Map<Integer,Integer> productIDsAndQuantities;
 
     @Column(name = "actions")
     private String actions;
@@ -38,4 +39,5 @@ public class Recipe {
                 ", actions='" + actions + '\'' +
                 '}';
     }
+
 }

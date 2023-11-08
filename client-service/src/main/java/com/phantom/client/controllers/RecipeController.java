@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.phantom.client.dto.*;
 import com.phantom.client.exceptions.InventoryServiceException;
 import com.phantom.client.exceptions.InventoryServiceTooManyRequestsException;
+import com.phantom.client.exceptions.SaveFailedException;
 import com.phantom.client.mappers.RecipeRestToDtoMapper;
 import com.phantom.client.services.InventoryService;
 import com.phantom.client.services.RecipeService;
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
@@ -109,9 +112,22 @@ public class RecipeController {
             return RECIPE_CREATE_VIEW;
         }
         RecipeRestDTO recipeRestDTO = recipeRestToDtoMapper.convertToRecipeRestDTO(recipeShowDTO);
-        RecipeRestDTO savedRecipeRestDTO = recipeService.save(recipeRestDTO).get();//todo exception
-        log.info("Receipt successfully created. {}", recipeShowDTO);
+        RecipeRestDTO savedRecipeRestDTO = recipeService.save(recipeRestDTO).get();
+        log.info("Receipt successfully created. {}", savedRecipeRestDTO);
         return "redirect:/recipe/all";
+    }
+
+    @ExceptionHandler (SaveFailedException.class)
+    public String failedSaveReceipt (Model model, SaveFailedException exception,
+                                     WebRequest request, HttpSession session){
+        log.info("Failed to save");
+        RecipeShowDTO  blank = (RecipeShowDTO) session.getAttribute("blank");
+        List <ProductDTO> productDTOList = (List<ProductDTO>) session.getAttribute("products");
+        model.addAttribute("blank", blank);
+        model.addAttribute("products",productDTOList);
+        model.addAttribute("exceptionMessage", exception.getMessage());
+        model.addAttribute("newProduct", new ProductToAdd());
+        return RECIPE_CREATE_VIEW;
     }
 
 }

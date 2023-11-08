@@ -26,6 +26,7 @@
         <label for="title">Choose recipe name</label>
         <input type="text" th:field = "*{title}" id = "title"/>
         <div th:if="${#fields.hasErrors('title')}" style="color: red" th:errors = "*{title}" ></div>
+        <div th:if="${exceptionMessage!=null}" th:text="${exceptionMessage}" style="color: red"></div>
         <br>
         <label for="actions">Choose actions</label>
         <input type="text" th:field = "*{actions}" id = "actions"/>

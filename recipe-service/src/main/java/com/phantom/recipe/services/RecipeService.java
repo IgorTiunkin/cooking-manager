@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -27,10 +28,10 @@ public class RecipeService {
     }
 
     @Transactional
-    public boolean save(Recipe recipe) {
-        recipeRepository.save(recipe);//todo - exception
-        log.info("recipe saved in db {}", recipe.getTitle());
-        return true;
+    public Recipe save(Recipe recipe) {
+        Recipe savedRecipe = recipeRepository.save(recipe);//todo - exception
+        log.info("recipe saved in db {}", savedRecipe.getTitle());
+        return savedRecipe;
     }
 
     public boolean delete(Recipe recipe) {
@@ -42,5 +43,9 @@ public class RecipeService {
         Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(RuntimeException::new);//todo custom exception not found
         log.info("Found recipe # {}",  recipeId);
         return recipeDTOMapper.mapToRecipeRestDTOList(List.of(recipe)).get(0);
+    }
+
+    public Optional<Recipe> getRecipeByTitle(String title) {
+        return recipeRepository.findRecipeByTitle(title);
     }
 }

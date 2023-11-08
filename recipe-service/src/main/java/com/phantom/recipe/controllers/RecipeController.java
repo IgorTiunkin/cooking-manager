@@ -1,13 +1,16 @@
 package com.phantom.recipe.controllers;
 
 import com.phantom.recipe.dto.RecipeRestDTO;
+import com.phantom.recipe.exceptions.SaveFailedException;
 import com.phantom.recipe.mappers.RecipeMapper;
 import com.phantom.recipe.models.Recipe;
 import com.phantom.recipe.services.RecipeService;
+import com.phantom.recipe.validators.RecipeValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,13 +24,13 @@ public class RecipeController {
     private final RecipeService recipeService;
     private final ModelMapper modelMapper;
     private final RecipeMapper recipeMapper;
+    private final RecipeValidator recipeValidator;
 
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
     public List<RecipeRestDTO> getAllRecipes() {
         log.info("Request all recipes");
-        List<RecipeRestDTO> allRecipes = recipeService.getAllRecipes();
-        return allRecipes;
+        return recipeService.getAllRecipes();
     }
 
     @GetMapping("/one")
@@ -38,16 +41,20 @@ public class RecipeController {
     }
 
     @PostMapping("/save")
-    @ResponseStatus(HttpStatus.CREATED)
-    public RecipeRestDTO saveNewRecipe(@RequestBody RecipeRestDTO recipeDTO) {
-        log.info("Request saving recipe: title - {}", recipeDTO.getTitle()); //todo - check duplicates
-        Recipe recipe = recipeMapper.convertToRecipe(recipeDTO);
-        boolean saved = recipeService.save(recipe);
-        if (saved) {
-            return recipeDTO;
-        } else {
-            throw new RuntimeException("saved failure");//todo custom exception
+    public ResponseEntity <RecipeRestDTO> saveNewRecipe(@RequestBody RecipeRestDTO recipeRestDTO) {
+        log.info("Request saving recipe: title - {}", recipeRestDTO.getTitle());
+        Recipe recipe = recipeMapper.convertToRecipe(recipeRestDTO);
+        boolean isFullDuplicateFound = recipeValidator.checkFullDuplicates(recipe);
+        boolean dbHasRecipeWithSameName = recipeValidator.dbHasRecipeWithSameName(recipe);
+        if (!isFullDuplicateFound && dbHasRecipeWithSameName) {
+            //countermeasure for retry - exception only for same name and different inside
+            log.info("Exception. Same title is present");
+            return new ResponseEntity<>(recipeRestDTO, HttpStatus.BAD_REQUEST);
         }
+        Recipe savedRecipe = recipeService.save(recipe);
+        recipeRestDTO.setRecipeId(savedRecipe.getRecipeId());
+        log.info("Successfully saved: title - {}", recipeRestDTO.getTitle());
+        return new ResponseEntity<>(recipeRestDTO, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/delete")

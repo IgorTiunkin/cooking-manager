@@ -1,17 +1,15 @@
 package com.phantom.client.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.phantom.client.dto.ProductDTO;
-import com.phantom.client.dto.RecipeShowDTO;
 import com.phantom.client.dto.RecipeRestDTO;
+import com.phantom.client.exceptions.SaveFailedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -47,15 +45,17 @@ public class RecipeService {
     }
 
     public CompletableFuture<RecipeRestDTO> save(RecipeRestDTO recipeRestDTO) {
-        return CompletableFuture.supplyAsync(() ->
-                builder.build()
-                        .post()
-                        .uri("http://api-gateway/api/v1/recipe/save")
-                        .body(Mono.just(recipeRestDTO), RecipeRestDTO.class)
-                        .retrieve()
-                        .bodyToMono(RecipeRestDTO.class)
-                        .block()
-        );
+            return CompletableFuture.supplyAsync(() ->  builder.build()
+                    .post()
+                    .uri("http://api-gateway/api/v1/recipe/save")
+                    .body(Mono.just(recipeRestDTO), RecipeRestDTO.class)
+                    .retrieve()
+                    .onStatus(
+                            HttpStatus.BAD_REQUEST::equals,
+                            response -> Mono.error(new SaveFailedException("Already have this title")))
+                    .bodyToMono(RecipeRestDTO.class)
+                    .block()
+            );
     }
 
 
