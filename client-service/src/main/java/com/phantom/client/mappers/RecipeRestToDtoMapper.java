@@ -20,7 +20,7 @@ public class RecipeRestToDtoMapper {
 
     }
 
-    private RecipeShowDTO convertToRecipeShowDto(RecipeRestDTO recipeRestDTO) {
+    private RecipeShowDTO convertToRecipeShowDto(RecipeRestDTO recipeRestDTO) {//todo make public and use directly
         List<ProductAndQuantityDTO> productAndQuantityDTOList = recipeRestDTO.getProductAndQuantityDTOList();
         TreeMap <ProductDTO, Integer> treeUsedProducts =
                 new TreeMap<>(Comparator.comparing(ProductDTO::getProductName));
@@ -38,5 +38,18 @@ public class RecipeRestToDtoMapper {
                 .usedProducts(treeUsedProducts)
                 .build();
 
+    }
+
+    public RecipeRestDTO convertToRecipeRestDTO(RecipeShowDTO recipeShowDTO) {
+        TreeMap<ProductDTO, Integer> usedProducts = recipeShowDTO.getUsedProducts();
+        List<ProductAndQuantityDTO> productAndQuantityDTOS = usedProducts.entrySet().stream()
+                .map(entry -> new ProductAndQuantityDTO(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+        return RecipeRestDTO.builder()
+                .recipeId(recipeShowDTO.getRecipeId())
+                .title(recipeShowDTO.getTitle())
+                .actions(recipeShowDTO.getActions())
+                .productAndQuantityDTOList(productAndQuantityDTOS)
+                .build();
     }
 }

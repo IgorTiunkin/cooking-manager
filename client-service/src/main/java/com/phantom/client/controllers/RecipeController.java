@@ -102,13 +102,14 @@ public class RecipeController {
     @PostMapping("/save")
     public String save(@ModelAttribute ("blank") @Valid RecipeShowDTO recipeShowDTO,
                        BindingResult bindingResult,
-                       Model model) {
+                       Model model) throws ExecutionException, InterruptedException {
         if (bindingResult.hasErrors()){
             log.info("Wrong request on adding receipt {}", bindingResult.getFieldErrors());
             model.addAttribute("newProduct", new ProductToAdd());
             return RECIPE_CREATE_VIEW;
         }
-        recipeService.save(recipeShowDTO);
+        RecipeRestDTO recipeRestDTO = recipeRestToDtoMapper.convertToRecipeRestDTO(recipeShowDTO);
+        RecipeRestDTO savedRecipeRestDTO = recipeService.save(recipeRestDTO).get();//todo exception
         log.info("Receipt successfully created. {}", recipeShowDTO);
         return "redirect:/recipe/all";
     }

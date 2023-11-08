@@ -28,7 +28,8 @@ public class RecipeService {
 
     @Transactional
     public boolean save(Recipe recipe) {
-        recipeRepository.save(recipe);
+        recipeRepository.save(recipe);//todo - exception
+        log.info("recipe saved in db {}", recipe.getTitle());
         return true;
     }
 

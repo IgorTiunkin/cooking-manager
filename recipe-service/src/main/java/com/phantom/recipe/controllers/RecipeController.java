@@ -1,6 +1,7 @@
 package com.phantom.recipe.controllers;
 
 import com.phantom.recipe.dto.RecipeRestDTO;
+import com.phantom.recipe.mappers.RecipeMapper;
 import com.phantom.recipe.models.Recipe;
 import com.phantom.recipe.services.RecipeService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class RecipeController {
 
     private final RecipeService recipeService;
     private final ModelMapper modelMapper;
+    private final RecipeMapper recipeMapper;
 
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
@@ -38,7 +40,8 @@ public class RecipeController {
     @PostMapping("/save")
     @ResponseStatus(HttpStatus.CREATED)
     public RecipeRestDTO saveNewRecipe(@RequestBody RecipeRestDTO recipeDTO) {
-        Recipe recipe = convertToRecipe(recipeDTO);
+        log.info("Request saving recipe: title - {}", recipeDTO.getTitle()); //todo - check duplicates
+        Recipe recipe = recipeMapper.convertToRecipe(recipeDTO);
         boolean saved = recipeService.save(recipe);
         if (saved) {
             return recipeDTO;
