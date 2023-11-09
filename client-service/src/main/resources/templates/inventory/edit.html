@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit product</title>
+</head>
+<body style="background: bisque">
+<div th:replace="allheaders::recipe_header"></div>
+<div>
+    <div style="width: 50%;  margin: 0 auto">
+        <form th:method="POST" th:action="@{/inventory/edit}" th:object="${product}">
+        <label for="name">Choose product name</label>
+        <input type="text" th:field = "*{productName}" id = "name"/>
+        <div th:if="${#fields.hasErrors('productName')}" style="color: red" th:errors = "*{productName}" ></div>
+        <div th:if="${exceptionMessage!=null}" th:text="${exceptionMessage}" style="color: red"></div>
+        <br>
+        <label for="calories">Choose calories</label>
+        <input type="text" th:field = "*{calories}" id = "calories"/>
+        <div th:if ="${#fields.hasErrors('calories')}" style="color: red" th:errors = "*{calories}"></div>
+        <br>
+        <input type="submit" value="Save product"/>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

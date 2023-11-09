@@ -2,6 +2,7 @@ package com.phantom.client.services;
 
 import com.phantom.client.dto.ProductDTO;
 import com.phantom.client.exceptions.inventoryservice.ProductNotFoundException;
+import com.phantom.client.exceptions.inventoryservice.ProductUpdateException;
 import com.phantom.client.exceptions.inventoryservice.resilence.InventoryServiceCircuitException;
 import com.phantom.client.exceptions.inventoryservice.resilence.InventoryServiceException;
 import com.phantom.client.exceptions.inventoryservice.resilence.InventoryServiceTimeoutException;
@@ -60,6 +61,20 @@ public class InventoryService {
 
     }
 
+    public CompletableFuture<ProductDTO> updateProduct(ProductDTO productDTO) {
+        return CompletableFuture.supplyAsync(()->
+                builder.build()
+                .post()
+                .uri("http://api-gateway/api/v1/product/update")
+                .body(Mono.just(productDTO), ProductDTO.class)
+                .retrieve()
+                .onStatus(HttpStatus.BAD_REQUEST::equals,
+                        clientResponse -> Mono.error(new ProductUpdateException("Such product name already present")))
+                        .bodyToMono(ProductDTO.class)
+                .block()
+                );
+    }
+
     public CompletableFuture <List <ProductDTO>> inventoryFail (Exception exception) {
         log.info("Fallback method failedGetProducts activated, {}", exception.getMessage());
         if (exception instanceof WebClientResponseException) {
@@ -82,5 +97,6 @@ public class InventoryService {
         log.info("Fallback method tooManyRequestsToInventory activated, {}", exception.getMessage());
         throw new InventoryServiceTooManyRequestsException("You have done too many requests to inventory. Please try later.");
     }
+
 
 }

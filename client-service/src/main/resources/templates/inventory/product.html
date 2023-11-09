@@ -12,6 +12,9 @@
         <span th:text="'Product name: ' + ${product.getProductName()}"></span>
         <br>
         <span th:text="'Calories: ' + ${product.getCalories()}" ></span>
+        <form th:method="GET" th:action="@{/inventory/edit/{id} (id = ${product.getProductId()})}">
+            <input type="submit" value="Edit product">
+        </form>
     </div>
 </div>
 

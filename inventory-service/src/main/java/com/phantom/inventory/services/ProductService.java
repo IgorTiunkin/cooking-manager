@@ -1,6 +1,6 @@
 package com.phantom.inventory.services;
 
-import com.phantom.inventory.dto.ProductDTO;
+import com.phantom.inventory.exceptions.ProductUpdateException;
 import com.phantom.inventory.models.Product;
 import com.phantom.inventory.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -28,5 +27,18 @@ public class ProductService {
 
     public Optional <Product> getById(Integer productId) {
         return productRepository.findById(productId);
+    }
+
+    @Transactional
+    public Product update(Product product) {
+        Optional<Product> productByName = getByName(product.getProductName());
+        if (productByName.isEmpty()) return productRepository.save(product);
+        Product productFromDbByName = productByName.get();
+        if (product.getProductId().equals(productFromDbByName.getProductId())) return productRepository.save(product);
+        throw new ProductUpdateException("Such product name already present");
+    }
+
+    public Optional <Product> getByName(String name) {
+        return productRepository.findByProductName(name);
     }
 }
