@@ -1,6 +1,7 @@
 package com.phantom.recipe.controllers;
 
 import com.phantom.recipe.dto.RecipeRestDTO;
+import com.phantom.recipe.exceptions.RecipeNotFoundException;
 import com.phantom.recipe.exceptions.SaveFailedException;
 import com.phantom.recipe.mappers.RecipeMapper;
 import com.phantom.recipe.models.Recipe;
@@ -22,7 +23,6 @@ import java.util.List;
 public class RecipeController {
 
     private final RecipeService recipeService;
-    private final ModelMapper modelMapper;
     private final RecipeMapper recipeMapper;
     private final RecipeValidator recipeValidator;
 
@@ -60,25 +60,14 @@ public class RecipeController {
     }
 
     @DeleteMapping("/delete")
-    @ResponseStatus(HttpStatus.OK)
-    public RecipeRestDTO deleteRecipe(@RequestBody RecipeRestDTO recipeRestDTO) {
-        Recipe recipe = convertToRecipe(recipeRestDTO);
-        boolean delete = recipeService.delete(recipe);
-        if (delete) {
-            return recipeRestDTO;
-        } else {
-            throw new RuntimeException("delete failure");//todo custom exception
+    public ResponseEntity <RecipeRestDTO> deleteRecipe(@RequestParam Integer recipeId) {
+        try {
+            RecipeRestDTO recipeRestDTO = recipeService.delete(recipeId);
+            log.info("Deleted recipe from db. Recipe id = {}", recipeRestDTO.getRecipeId());
+            return new ResponseEntity<>(recipeRestDTO, HttpStatus.OK);
+        } catch (RecipeNotFoundException recipeNotFoundException) {
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
-
     }
-
-    private Recipe convertToRecipe(RecipeRestDTO recipeRestDTO) {
-        return modelMapper.map(recipeRestDTO, Recipe.class);
-    }
-
-    private RecipeRestDTO convertToRecipeRestDto(Recipe recipe) {
-        return modelMapper.map(recipe, RecipeRestDTO.class);
-    }
-
 
 }

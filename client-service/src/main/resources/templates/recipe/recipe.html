@@ -15,11 +15,15 @@
         <div th:each="product:${recipe.getUsedProducts()}"
            th:text="${product.getKey().getProductName() + ' ' + product.getValue()}">
             <a th:href="@{/inventory/product/{id} (id = ${product.getKey().getProductId()})}"
-            th:text="'Описание продукта ' + ${product.getKey().getProductName()}"></a>
+            th:text="'Product description ' + ${product.getKey().getProductName()}"></a>
         </div>
         <br>
         <span>Actions</span>
         <p th:text="${recipe.getActions()}"></p>
+        <form th:action="@{/recipe/delete/{id} (id = ${recipe.getRecipeId()})}"
+         th:method="DELETE">
+            <input type="submit" value="Delete receipt">
+        </form>
     </div>
 </div>
 

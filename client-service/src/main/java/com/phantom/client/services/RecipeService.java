@@ -1,6 +1,7 @@
 package com.phantom.client.services;
 
 import com.phantom.client.dto.RecipeRestDTO;
+import com.phantom.client.exceptions.DeleteFailedException;
 import com.phantom.client.exceptions.SaveFailedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,5 +60,18 @@ public class RecipeService {
     }
 
 
-
+    public CompletableFuture<RecipeRestDTO> delete(Integer recipeId) {
+        return CompletableFuture.supplyAsync( () ->
+                builder.build()
+                .delete()
+                .uri("http://api-gateway/api/v1/recipe/delete" ,
+                        uriBuilder -> uriBuilder.queryParam("recipeId", recipeId).build())
+                .retrieve()
+                .onStatus(
+                        HttpStatus.BAD_REQUEST::equals,
+                        response -> Mono.error(new DeleteFailedException("Delete failed. Check if this recipe still present.")))
+                .bodyToMono(RecipeRestDTO.class)
+                .block()
+        );
+    }
 }

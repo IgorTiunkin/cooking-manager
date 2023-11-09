@@ -1,6 +1,7 @@
 package com.phantom.recipe.services;
 
 import com.phantom.recipe.dto.RecipeRestDTO;
+import com.phantom.recipe.exceptions.RecipeNotFoundException;
 import com.phantom.recipe.mappers.RecipeDTOMapper;
 import com.phantom.recipe.repositories.RecipeRepository;
 import com.phantom.recipe.models.Recipe;
@@ -34,15 +35,17 @@ public class RecipeService {
         return savedRecipe;
     }
 
-    public boolean delete(Recipe recipe) {
-        recipeRepository.delete(recipe);
-        return true;
+    @Transactional
+    public RecipeRestDTO delete(Integer recipeId) {
+        RecipeRestDTO recipeById = getRecipeById(recipeId);
+        recipeRepository.deleteById(recipeId);
+        return recipeById;
     }
 
     public RecipeRestDTO getRecipeById(Integer recipeId) {
-        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(RuntimeException::new);//todo custom exception not found
+        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeNotFoundException("Recipe no found"));
         log.info("Found recipe # {}",  recipeId);
-        return recipeDTOMapper.mapToRecipeRestDTOList(List.of(recipe)).get(0);
+        return recipeDTOMapper.mapToRecipeRestDTOList(List.of(recipe)).get(0);//todo use base method
     }
 
     public Optional<Recipe> getRecipeByTitle(String title) {

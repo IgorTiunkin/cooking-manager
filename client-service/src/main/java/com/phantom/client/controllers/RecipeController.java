@@ -1,9 +1,9 @@
 package com.phantom.client.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.phantom.client.dto.*;
-import com.phantom.client.exceptions.InventoryServiceException;
-import com.phantom.client.exceptions.InventoryServiceTooManyRequestsException;
+import com.phantom.client.exceptions.DeleteFailedException;
+import com.phantom.client.exceptions.inventoryservice.InventoryServiceException;
+import com.phantom.client.exceptions.inventoryservice.InventoryServiceTooManyRequestsException;
 import com.phantom.client.exceptions.SaveFailedException;
 import com.phantom.client.mappers.RecipeRestToDtoMapper;
 import com.phantom.client.services.InventoryService;
@@ -39,6 +39,7 @@ public class RecipeController {
     private static final String INVENTORY_SERVICE_ERROR_VIEW = "recipe/errors/inventory_service_error";
     private static final String RECIPE_VIEW = "recipe/recipe";
     private static final String WELCOME_VIEW = "recipe/welcome";
+    private static final String RECIPE_DELETE_ERROR_VIEW = "recipe/errors/recipe_delete_error";
 
     @GetMapping
     public String welcome() {
@@ -82,11 +83,10 @@ public class RecipeController {
 
 
     @PostMapping("/add-product")
-    public String addProduct(@ModelAttribute ("newProduct") @Valid ProductToAdd productToAdd,
+    public String addProduct(@ModelAttribute("newProduct") @Valid ProductToAdd productToAdd,
                              BindingResult bindingResult,
-                             @ModelAttribute ("blank") RecipeShowDTO recipeShowDTO,
-                             @ModelAttribute ("products") List <ProductDTO> productDTOList,
-                             Model model) {
+                             @ModelAttribute("blank") RecipeShowDTO recipeShowDTO,
+                             @ModelAttribute("products") List<ProductDTO> productDTOList) {
         if (bindingResult.hasErrors()) {
             log.info("Wrong request on adding product. {}", bindingResult.getFieldErrors());
             return RECIPE_CREATE_VIEW;
@@ -129,5 +129,21 @@ public class RecipeController {
         model.addAttribute("newProduct", new ProductToAdd());
         return RECIPE_CREATE_VIEW;
     }
+
+    @DeleteMapping ("/delete/{id}")
+    public String deleteRecipe (@PathVariable("id") Integer recipeId) throws ExecutionException, InterruptedException {
+        log.info("Delete request for recipe id {}", recipeId);
+        RecipeRestDTO recipeRestDTO = recipeService.delete(recipeId).get();
+        log.info("Recipe successfully deleted. Recipe id = {}", recipeRestDTO.getRecipeId());
+        return "redirect:/recipe/all";
+    }
+
+    @ExceptionHandler(DeleteFailedException.class)
+    public String deleteException(DeleteFailedException exception, Model model) {
+        log.info("Recipe deletion failed.");
+        model.addAttribute("exceptionMessage", exception.getMessage());
+        return RECIPE_DELETE_ERROR_VIEW;
+    }
+
 
 }

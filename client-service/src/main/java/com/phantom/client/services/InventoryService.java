@@ -1,10 +1,10 @@
 package com.phantom.client.services;
 
 import com.phantom.client.dto.ProductDTO;
-import com.phantom.client.exceptions.InventoryServiceCircuitException;
-import com.phantom.client.exceptions.InventoryServiceException;
-import com.phantom.client.exceptions.InventoryServiceTimeoutException;
-import com.phantom.client.exceptions.InventoryServiceTooManyRequestsException;
+import com.phantom.client.exceptions.inventoryservice.InventoryServiceCircuitException;
+import com.phantom.client.exceptions.inventoryservice.InventoryServiceException;
+import com.phantom.client.exceptions.inventoryservice.InventoryServiceTimeoutException;
+import com.phantom.client.exceptions.inventoryservice.InventoryServiceTooManyRequestsException;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.ratelimiter.RequestNotPermitted;
