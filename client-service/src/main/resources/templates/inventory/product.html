@@ -2,12 +2,16 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Concrete receipt</title>
+    <title>Concrete product</title>
 </head>
 <body style="background: bisque">
+<div th:replace="allheaders::recipe_header"></div>
 <div>
     <div style="width: 50%;  margin: 0 auto">
-
+        <p style="font-size: 26px">Product description</p>
+        <span th:text="'Product name: ' + ${product.getProductName()}"></span>
+        <br>
+        <span th:text="'Calories: ' + ${product.getCalories()}" ></span>
     </div>
 </div>
 

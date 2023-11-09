@@ -8,23 +8,22 @@
 <div th:replace="allheaders::recipe_header"></div>
 <div>
     <div style="width: 50%;  margin: 0 auto">
-        <p th:text="${recipe.getTitle()}"></p>
-        <br>
-        <span>Products</span>
-        <br>
-        <div th:each="product:${recipe.getUsedProducts()}"
-           th:text="${product.getKey().getProductName() + ' ' + product.getValue()}">
-            <a th:href="@{/inventory/product/{id} (id = ${product.getKey().getProductId()})}"
-            th:text="'Product description ' + ${product.getKey().getProductName()}"></a>
+        <p th:text="${recipe.getTitle()}" style="font-size: 26px; color: green"></p>
+        <span style="font-size: 20px" >Products</span>
+        <br> <br>
+        <div th:each="entry:${recipe.getUsedProducts()}">
+            <a th:href="@{/inventory/product/{id} (id = ${entry.getKey().getProductId()})}"
+            th:text="${entry.getKey().getProductName()}"></a>
+            <span th:text="' - ' + ${entry.getValue()}"></span>
         </div>
         <br>
-        <span>Actions</span>
+        <span style="font-size: 20px">Actions</span>
         <p th:text="${recipe.getActions()}"></p>
+        <br>
         <form th:action="@{/recipe/delete/{id} (id = ${recipe.getRecipeId()})}"
          th:method="DELETE">
             <input type="submit" value="Delete receipt">
         </form>
-        <br>
         <form th:action="@{/recipe/edit/{id} (id = ${recipe.getRecipeId()})}"
               th:method="GET">
             <input type="submit" value="Edit receipt">

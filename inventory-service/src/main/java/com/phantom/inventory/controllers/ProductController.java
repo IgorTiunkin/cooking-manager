@@ -8,12 +8,10 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -24,16 +22,6 @@ public class ProductController {
 
     private final ProductService productService;
     private final ModelMapper modelMapper;
-
-    @GetMapping ("/decription")
-    @ResponseStatus(HttpStatus.OK)
-    public List<ProductDTO> getProductsDescription(@RequestBody List <Integer> listOfProductId) {
-        List<Product> products = productService.getAllById(listOfProductId);
-        return products.stream().map(this::convertToProductDTO)
-                .collect(Collectors.toList());
-    }
-
-
 
     @GetMapping ("/all")
     @ResponseStatus(HttpStatus.OK)
@@ -53,5 +41,15 @@ public class ProductController {
         log.info("Requested products in list");
         List<Product> productList = productService.getAllById(new ArrayList<>(productIdList));
         return productList.stream().map(this::convertToProductDTO).collect(Collectors.toList());
+    }
+
+    @GetMapping ("/one")
+    public ResponseEntity <ProductDTO> getProductById(@RequestParam ("productId") Integer productId) {
+        log.info("Request product. Id: {}", productId);
+        Optional<Product> productById = productService.getById(productId);
+        if (productById.isEmpty()) return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+        Product product = productById.get();
+        ProductDTO productDTO = convertToProductDTO(product);
+        return new ResponseEntity<>(productDTO, HttpStatus.OK);
     }
 }

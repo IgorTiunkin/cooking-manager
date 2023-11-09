@@ -1,10 +1,9 @@
 package com.phantom.client.services;
 
 import com.phantom.client.dto.RecipeRestDTO;
-import com.phantom.client.dto.RecipeShowDTO;
-import com.phantom.client.exceptions.DeleteFailedException;
-import com.phantom.client.exceptions.SaveFailedException;
-import com.phantom.client.exceptions.UpdateFailedException;
+import com.phantom.client.exceptions.receiptservice.DeleteFailedException;
+import com.phantom.client.exceptions.receiptservice.SaveFailedException;
+import com.phantom.client.exceptions.receiptservice.UpdateFailedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -41,7 +40,7 @@ public class RecipeService {
                 .get()
                 .uri("http://api-gateway/api/v1/recipe/one",
                         uriBuilder -> uriBuilder.queryParam("recipeId", recipeId).build())
-                .retrieve()
+                .retrieve()//todo not found exception
                 .bodyToMono(RecipeRestDTO.class)
                 .block()
         );

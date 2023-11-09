@@ -1,11 +1,11 @@
 package com.phantom.client.controllers;
 
 import com.phantom.client.dto.*;
-import com.phantom.client.exceptions.DeleteFailedException;
-import com.phantom.client.exceptions.UpdateFailedException;
-import com.phantom.client.exceptions.inventoryservice.InventoryServiceException;
-import com.phantom.client.exceptions.inventoryservice.InventoryServiceTooManyRequestsException;
-import com.phantom.client.exceptions.SaveFailedException;
+import com.phantom.client.exceptions.receiptservice.DeleteFailedException;
+import com.phantom.client.exceptions.receiptservice.UpdateFailedException;
+import com.phantom.client.exceptions.inventoryservice.resilence.InventoryServiceException;
+import com.phantom.client.exceptions.inventoryservice.resilence.InventoryServiceTooManyRequestsException;
+import com.phantom.client.exceptions.receiptservice.SaveFailedException;
 import com.phantom.client.mappers.RecipeRestToDtoMapper;
 import com.phantom.client.services.InventoryService;
 import com.phantom.client.services.RecipeService;

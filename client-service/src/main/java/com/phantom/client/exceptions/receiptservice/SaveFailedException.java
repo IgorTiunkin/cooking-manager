@@ -1,4 +1,4 @@
-package com.phantom.client.exceptions;
+package com.phantom.client.exceptions.receiptservice;
 
 public class SaveFailedException extends RuntimeException{
     public SaveFailedException(String message) {
