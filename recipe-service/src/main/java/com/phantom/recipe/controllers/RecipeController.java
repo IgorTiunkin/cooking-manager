@@ -51,9 +51,11 @@ public class RecipeController {
             log.info("Exception. Same title is present");
             return new ResponseEntity<>(recipeRestDTO, HttpStatus.BAD_REQUEST);
         }
-        Recipe savedRecipe = recipeService.save(recipe);
-        recipeRestDTO.setRecipeId(savedRecipe.getRecipeId());
-        log.info("Successfully saved: title - {}", recipeRestDTO.getTitle());
+        if (!isFullDuplicateFound) {
+            Recipe savedRecipe = recipeService.save(recipe);
+            recipeRestDTO.setRecipeId(savedRecipe.getRecipeId());
+            log.info("Successfully saved: title - {}", recipeRestDTO.getTitle());
+        }
         return new ResponseEntity<>(recipeRestDTO, HttpStatus.CREATED);
     }
 
