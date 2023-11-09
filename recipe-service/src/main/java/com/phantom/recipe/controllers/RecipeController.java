@@ -2,14 +2,12 @@ package com.phantom.recipe.controllers;
 
 import com.phantom.recipe.dto.RecipeRestDTO;
 import com.phantom.recipe.exceptions.RecipeNotFoundException;
-import com.phantom.recipe.exceptions.SaveFailedException;
 import com.phantom.recipe.mappers.RecipeMapper;
 import com.phantom.recipe.models.Recipe;
 import com.phantom.recipe.services.RecipeService;
 import com.phantom.recipe.validators.RecipeValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +42,7 @@ public class RecipeController {
     public ResponseEntity <RecipeRestDTO> saveNewRecipe(@RequestBody RecipeRestDTO recipeRestDTO) {
         log.info("Request saving recipe: title - {}", recipeRestDTO.getTitle());
         Recipe recipe = recipeMapper.convertToRecipe(recipeRestDTO);
-        boolean isFullDuplicateFound = recipeValidator.checkFullDuplicates(recipe);
+        boolean isFullDuplicateFound = recipeValidator.checkFullDuplicatesByTitle(recipe);
         boolean dbHasRecipeWithSameName = recipeValidator.dbHasRecipeWithSameName(recipe);
         if (!isFullDuplicateFound && dbHasRecipeWithSameName) {
             //countermeasure for retry - exception only for same name and different inside
@@ -68,6 +66,24 @@ public class RecipeController {
         } catch (RecipeNotFoundException recipeNotFoundException) {
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity <RecipeRestDTO> updateRecipe(@RequestBody RecipeRestDTO recipeRestDTO) {
+        log.info("Request updating recipe: title - {}", recipeRestDTO.getTitle());
+        Recipe recipe = recipeMapper.convertToRecipe(recipeRestDTO);
+        recipe.setRecipeId(recipeRestDTO.getRecipeId());
+        boolean dbHasRecipeWithSameName = recipeValidator.dbHasRecipeWithSameName(recipe);
+        boolean isIdEqualsForSameTitle = recipeValidator.checkIdEqualityForSameTitle(recipe);
+        if (!dbHasRecipeWithSameName || isIdEqualsForSameTitle) {
+            //if there are no same title or recipe with same title has same id
+            Recipe savedRecipe = recipeService.save(recipe);
+            log.info("Successfully updated: title - {}", savedRecipe.getTitle());
+            return new ResponseEntity<>(recipeRestDTO, HttpStatus.CREATED);
+        }
+        //different ids. same title - then exception
+        log.info("Exception. Same title is present");
+        return new ResponseEntity<>(recipeRestDTO, HttpStatus.BAD_REQUEST);
     }
 
 }

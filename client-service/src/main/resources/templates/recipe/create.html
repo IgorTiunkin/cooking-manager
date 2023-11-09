@@ -22,7 +22,7 @@
 <div th:replace="allheaders::recipe_header"></div>
 <div>
     <div style="width: 50%;  margin: 0 auto">
-    <form th:method="POST" th:action="@{/recipe/save}" th:object="${blank}">
+    <form th:method="POST" th:action="@{/recipe/save}" th:object="${recipe}">
         <label for="title">Choose recipe name</label>
         <input type="text" th:field = "*{title}" id = "title"/>
         <div th:if="${#fields.hasErrors('title')}" style="color: red" th:errors = "*{title}" ></div>
@@ -32,9 +32,9 @@
         <input type="text" th:field = "*{actions}" id = "actions"/>
         <div th:if ="${#fields.hasErrors('actions')}" style="color: red" th:errors = "*{actions}"></div>
         <br>
-        <div th:if="${!blank.getUsedProducts().isEmpty()}" style="margin-left: 100px">
+        <div th:if="${!recipe.getUsedProducts().isEmpty()}" style="margin-left: 100px">
             Already added products
-            <div th:each="product : ${blank.getUsedProducts()}">
+            <div th:each="product : ${recipe.getUsedProducts()}">
                 <span th:text="${product.getKey().getProductName() + ' ' + product.getValue()}"></span>
             </div>
         </div>

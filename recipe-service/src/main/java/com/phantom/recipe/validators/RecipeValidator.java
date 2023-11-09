@@ -13,7 +13,9 @@ public class RecipeValidator {
 
     private final RecipeService recipeService;
 
-    public boolean checkFullDuplicates(Recipe recipe) {
+
+
+    public boolean checkFullDuplicatesByTitle(Recipe recipe) {
         Optional<Recipe> recipeByTitle = recipeService.getRecipeByTitle(recipe.getTitle());
         if (recipeByTitle.isEmpty()) return false;
         Recipe recipeFromDb = recipeByTitle.get();
@@ -23,5 +25,12 @@ public class RecipeValidator {
     public boolean dbHasRecipeWithSameName(Recipe recipe) {
         Optional<Recipe> recipeByTitle = recipeService.getRecipeByTitle(recipe.getTitle());
         return recipeByTitle.isPresent();
+    }
+
+    public boolean checkIdEqualityForSameTitle(Recipe recipe) {
+        Optional<Recipe> recipeByTitle = recipeService.getRecipeByTitle(recipe.getTitle());
+        if (recipeByTitle.isEmpty()) return false;
+        Recipe recipeFromDb = recipeByTitle.get();
+        return recipeFromDb.getRecipeId() == recipe.getRecipeId();
     }
 }

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit</title>
+    <style>
+        label{
+            display:inline-block;
+            width:150px;
+            margin-right:30px;
+            text-align:right;
+        }
+
+        fieldset{
+            border:none;
+            width:500px;
+            margin:0px auto;
+        }
+    </style>
+</head>
+<body style="background: bisque">
+<div th:replace="allheaders::recipe_header"></div>
+<div>
+    <div style="width: 50%;  margin: 0 auto">
+        <form th:method="POST" th:action="@{/recipe/edit}" th:object="${recipe}">
+            <label for="title">Choose recipe name</label>
+            <input type="text" th:field = "*{title}" id = "title"/>
+            <div th:if="${#fields.hasErrors('title')}" style="color: red" th:errors = "*{title}" ></div>
+            <div th:if="${exceptionMessage!=null}" th:text="${exceptionMessage}" style="color: red"></div>
+            <br>
+            <label for="actions">Choose actions</label>
+            <input type="text" th:field = "*{actions}" id = "actions"/>
+            <div th:if ="${#fields.hasErrors('actions')}" style="color: red" th:errors = "*{actions}"></div>
+            <br>
+            <div th:if="${!recipe.getUsedProducts().isEmpty()}" style="margin-left: 100px">
+                Already added products
+                <div th:each="product : ${recipe.getUsedProducts()}">
+                    <span th:text="${product.getKey().getProductName() + ' ' + product.getValue()}"></span>
+                </div>
+            </div>
+            <input type="submit" value="Save receipt"/>
+        </form>
+        <br>
+        Add product
+        <br>
+        <br>
+        <form th:method="POST" th:action="@{/recipe/add-product}" th:object="${newProduct}">
+            <label for = "product">Choose product</label>
+            <select th:object="${newProduct}" th:field = "*{productId}" id = "product">
+                <option th:each = "product : ${products}" th:value = "${product.getProductId()}"
+                        th:text = "${product.getProductName()}"></option>
+            </select>
+            <br>
+            <label for="quantity">Choose quantity</label>
+            <input type="text" th:field = "*{quantity}" id = "quantity"/>
+            <div th:if = "${#fields.hasErrors('quantity')}" style="color: red" th:errors = "*{quantity}"></div>
+            <br>
+            <input type = "submit" value = "Add product"/>
+            <br>
+        </form>
+    </div>
+</div>
+</body>
+</html>

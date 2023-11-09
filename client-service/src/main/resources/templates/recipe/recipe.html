@@ -24,6 +24,11 @@
          th:method="DELETE">
             <input type="submit" value="Delete receipt">
         </form>
+        <br>
+        <form th:action="@{/recipe/edit/{id} (id = ${recipe.getRecipeId()})}"
+              th:method="GET">
+            <input type="submit" value="Edit receipt">
+        </form>
     </div>
 </div>
 

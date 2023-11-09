@@ -1,8 +1,10 @@
 package com.phantom.client.services;
 
 import com.phantom.client.dto.RecipeRestDTO;
+import com.phantom.client.dto.RecipeShowDTO;
 import com.phantom.client.exceptions.DeleteFailedException;
 import com.phantom.client.exceptions.SaveFailedException;
+import com.phantom.client.exceptions.UpdateFailedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -70,6 +72,21 @@ public class RecipeService {
                 .onStatus(
                         HttpStatus.BAD_REQUEST::equals,
                         response -> Mono.error(new DeleteFailedException("Delete failed. Check if this recipe still present.")))
+                .bodyToMono(RecipeRestDTO.class)
+                .block()
+        );
+    }
+
+    public CompletableFuture<RecipeRestDTO> update(RecipeRestDTO recipeRestDTO) {
+        return CompletableFuture.supplyAsync(() ->
+                builder.build()
+                .post()
+                .uri("http://api-gateway/api/v1/recipe/update")
+                .body(Mono.just(recipeRestDTO), RecipeRestDTO.class)
+                .retrieve()
+                .onStatus(
+                        HttpStatus.BAD_REQUEST::equals,
+                        response -> Mono.error(new UpdateFailedException("Update failed. Name is already present")))
                 .bodyToMono(RecipeRestDTO.class)
                 .block()
         );

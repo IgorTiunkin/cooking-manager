@@ -2,6 +2,7 @@ package com.phantom.client.controllers;
 
 import com.phantom.client.dto.*;
 import com.phantom.client.exceptions.DeleteFailedException;
+import com.phantom.client.exceptions.UpdateFailedException;
 import com.phantom.client.exceptions.inventoryservice.InventoryServiceException;
 import com.phantom.client.exceptions.inventoryservice.InventoryServiceTooManyRequestsException;
 import com.phantom.client.exceptions.SaveFailedException;
@@ -20,12 +21,11 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @Controller
 @RequestMapping("/recipe")
-@SessionAttributes({"products", "blank"})
+@SessionAttributes({"products", "recipe"})
 @RequiredArgsConstructor
 @Slf4j
 public class RecipeController {
@@ -40,6 +40,7 @@ public class RecipeController {
     private static final String RECIPE_VIEW = "recipe/recipe";
     private static final String WELCOME_VIEW = "recipe/welcome";
     private static final String RECIPE_DELETE_ERROR_VIEW = "recipe/errors/recipe_delete_error";
+    private static final String RECIPE_EDIT_VIEW = "recipe/edit";
 
     @GetMapping
     public String welcome() {
@@ -68,7 +69,7 @@ public class RecipeController {
     @GetMapping("/create")
     public String getCreationBlank(Model model) throws ExecutionException, InterruptedException {
         List<ProductDTO> allProducts = inventoryService.getAllProducts().get();
-        model.addAttribute("blank", new RecipeShowDTO());
+        model.addAttribute("recipe", new RecipeShowDTO());
         model.addAttribute("products", allProducts);
         model.addAttribute("newProduct", new ProductToAdd());
         return RECIPE_CREATE_VIEW;
@@ -85,11 +86,12 @@ public class RecipeController {
     @PostMapping("/add-product")
     public String addProduct(@ModelAttribute("newProduct") @Valid ProductToAdd productToAdd,
                              BindingResult bindingResult,
-                             @ModelAttribute("blank") RecipeShowDTO recipeShowDTO,
+                             @ModelAttribute("recipe") RecipeShowDTO recipeShowDTO,
                              @ModelAttribute("products") List<ProductDTO> productDTOList) {
         if (bindingResult.hasErrors()) {
             log.info("Wrong request on adding product. {}", bindingResult.getFieldErrors());
-            return RECIPE_CREATE_VIEW;
+            if (recipeShowDTO.getRecipeId()==null) return RECIPE_CREATE_VIEW;
+            return RECIPE_EDIT_VIEW;
         }
         Map<ProductDTO, Integer> usedProducts = recipeShowDTO.getUsedProducts();
         ProductDTO productToAddDTO = productDTOList.stream()
@@ -99,11 +101,12 @@ public class RecipeController {
         if (productToAdd.getQuantity()==0) {
             usedProducts.remove(productToAddDTO);
         }
-        return RECIPE_CREATE_VIEW;
+        if (recipeShowDTO.getRecipeId()==null) return RECIPE_CREATE_VIEW;
+        return RECIPE_EDIT_VIEW;
     }
 
     @PostMapping("/save")
-    public String save(@ModelAttribute ("blank") @Valid RecipeShowDTO recipeShowDTO,
+    public String save(@ModelAttribute ("recipe") @Valid RecipeShowDTO recipeShowDTO,
                        BindingResult bindingResult,
                        Model model) throws ExecutionException, InterruptedException {
         if (bindingResult.hasErrors()){
@@ -118,12 +121,12 @@ public class RecipeController {
     }
 
     @ExceptionHandler (SaveFailedException.class)
-    public String failedSaveReceipt (Model model, SaveFailedException exception,
-                                     WebRequest request, HttpSession session){
+    public String failedSaveRecipe(Model model, SaveFailedException exception,
+                                   WebRequest request, HttpSession session){
         log.info("Failed to save");
-        RecipeShowDTO  blank = (RecipeShowDTO) session.getAttribute("blank");
+        RecipeShowDTO recipe = (RecipeShowDTO) session.getAttribute("recipe");
         List <ProductDTO> productDTOList = (List<ProductDTO>) session.getAttribute("products");
-        model.addAttribute("blank", blank);
+        model.addAttribute("recipe", recipe);
         model.addAttribute("products",productDTOList);
         model.addAttribute("exceptionMessage", exception.getMessage());
         model.addAttribute("newProduct", new ProductToAdd());
@@ -139,11 +142,48 @@ public class RecipeController {
     }
 
     @ExceptionHandler(DeleteFailedException.class)
-    public String deleteException(DeleteFailedException exception, Model model) {
+    public String failedDeleteRecipe(DeleteFailedException exception, Model model) {
         log.info("Recipe deletion failed.");
         model.addAttribute("exceptionMessage", exception.getMessage());
         return RECIPE_DELETE_ERROR_VIEW;
     }
 
+    @GetMapping("/edit/{id}")
+    public String editRecipe (@PathVariable ("id") Integer recipeId,
+                              @ModelAttribute("recipe") RecipeShowDTO recipeShowDTO,
+                              Model model) throws ExecutionException, InterruptedException {
+        List<ProductDTO> allProducts = inventoryService.getAllProducts().get();
+        model.addAttribute("products", allProducts);
+        model.addAttribute("newProduct", new ProductToAdd());
+        return RECIPE_EDIT_VIEW;
+    }
+
+    @PostMapping("/edit")
+    public String saveEditRecipe (@ModelAttribute("recipe") @Valid RecipeShowDTO recipeShowDTO,
+                                  BindingResult bindingResult, Model model) throws ExecutionException, InterruptedException {
+        if (bindingResult.hasErrors()){
+            log.info("Wrong request on updating receipt {}", bindingResult.getFieldErrors());
+            model.addAttribute("newProduct", new ProductToAdd());
+            return RECIPE_EDIT_VIEW;
+        }
+        RecipeRestDTO recipeRestDTO = recipeRestToDtoMapper.convertToRecipeRestDTO(recipeShowDTO);
+        RecipeRestDTO updatedRecipeRestDTO = recipeService.update(recipeRestDTO).get();
+        log.info("Receipt successfully created. {}", updatedRecipeRestDTO);
+        return "redirect:/recipe/recipe/"+recipeRestDTO.getRecipeId();
+    }
+
+
+    @ExceptionHandler (UpdateFailedException.class)
+    public String failedUpdateRecipe (Model model, UpdateFailedException exception,
+                                     WebRequest request, HttpSession session){
+        log.info("Failed to update");
+        RecipeShowDTO recipeShowDTO = (RecipeShowDTO) session.getAttribute("recipe");
+        List <ProductDTO> productDTOList = (List<ProductDTO>) session.getAttribute("products");
+        model.addAttribute("recipe", recipeShowDTO);
+        model.addAttribute("products",productDTOList);
+        model.addAttribute("exceptionMessage", exception.getMessage());
+        model.addAttribute("newProduct", new ProductToAdd());
+        return RECIPE_EDIT_VIEW;
+    }
 
 }
