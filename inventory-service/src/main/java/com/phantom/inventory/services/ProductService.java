@@ -1,5 +1,6 @@
 package com.phantom.inventory.services;
 
+import com.phantom.inventory.exceptions.ProductDeleteAbsentException;
 import com.phantom.inventory.exceptions.ProductSaveException;
 import com.phantom.inventory.exceptions.ProductUpdateException;
 import com.phantom.inventory.models.Product;
@@ -52,5 +53,11 @@ public class ProductService {
         return productRepository.findByProductName(name);
     }
 
-
+    @Transactional
+    public Product delete(Integer productId) {
+        Optional<Product> productByID = productRepository.findById(productId);
+        if (productByID.isEmpty()) throw new ProductDeleteAbsentException("Product not found");
+        productRepository.delete(productByID.get());
+        return productByID.get();
+    }
 }

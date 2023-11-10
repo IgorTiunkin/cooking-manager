@@ -1,6 +1,7 @@
 package com.phantom.client.services;
 
 import com.phantom.client.dto.ProductDTO;
+import com.phantom.client.exceptions.inventoryservice.ProductDeleteAbsentException;
 import com.phantom.client.exceptions.inventoryservice.ProductNotFoundException;
 import com.phantom.client.exceptions.inventoryservice.ProductSaveException;
 import com.phantom.client.exceptions.inventoryservice.ProductUpdateException;
@@ -76,6 +77,20 @@ public class InventoryService {
                 );
     }
 
+    public CompletableFuture<ProductDTO>delete(Integer productId) {
+        return CompletableFuture.supplyAsync( () ->
+                builder.build()
+                .delete()
+                .uri("http://api-gateway/api/v1/product/delete",
+                        uriBuilder -> uriBuilder.queryParam("productId", productId).build())
+                .retrieve()
+                .onStatus(HttpStatus.BAD_REQUEST::equals,
+                        clientResponse -> Mono.error(new ProductDeleteAbsentException("Product not found. Check if it is still present")))
+                .bodyToMono(ProductDTO.class)
+                .block()
+                );
+    }
+
     public CompletableFuture<ProductDTO> updateProduct(ProductDTO productDTO) {
         return CompletableFuture.supplyAsync(()->
                 builder.build()
@@ -113,6 +128,7 @@ public class InventoryService {
         log.info("Fallback method tooManyRequestsToInventory activated, {}", exception.getMessage());
         throw new InventoryServiceTooManyRequestsException("You have done too many requests to inventory. Please try later.");
     }
+
 
 
 }

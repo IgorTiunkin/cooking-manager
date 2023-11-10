@@ -1,6 +1,7 @@
 package com.phantom.inventory.controllers;
 
 import com.phantom.inventory.dto.ProductDTO;
+import com.phantom.inventory.exceptions.ProductDeleteAbsentException;
 import com.phantom.inventory.exceptions.ProductSaveException;
 import com.phantom.inventory.exceptions.ProductUpdateException;
 import com.phantom.inventory.models.Product;
@@ -69,6 +70,21 @@ public class ProductController {
     @ExceptionHandler (ProductSaveException.class)
     public ResponseEntity <ProductDTO> failedSaveProduct(ProductSaveException productSaveException) {
         log.info("Save failed. {}", productSaveException.getMessage());
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<ProductDTO> deleteProduct (@RequestParam ("productId") Integer productId) {
+        log.info("Request delete product. Id {}", productId);
+        Product deletedProduct = productService.delete(productId);
+        ProductDTO deletedProductDTO = convertToProductDTO(deletedProduct);
+        log.info("Product successfully deleted. Id {}", deletedProductDTO.getProductId());
+        return new ResponseEntity<>(deletedProductDTO, HttpStatus.OK);
+    }
+
+    @ExceptionHandler (ProductDeleteAbsentException.class)
+    public ResponseEntity<ProductDTO> failedDeleteProduct(ProductDeleteAbsentException productDeleteAbsentException){
+        log.info("Delete Failed {}", productDeleteAbsentException.getMessage());
         return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 

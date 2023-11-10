@@ -2,7 +2,7 @@ package com.phantom.client.controllers;
 
 
 import com.phantom.client.dto.ProductDTO;
-import com.phantom.client.dto.RecipeShowDTO;
+import com.phantom.client.exceptions.inventoryservice.ProductDeleteAbsentException;
 import com.phantom.client.exceptions.inventoryservice.ProductSaveException;
 import com.phantom.client.exceptions.inventoryservice.ProductUpdateException;
 import com.phantom.client.services.InventoryService;
@@ -17,7 +17,6 @@ import org.springframework.web.context.request.WebRequest;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @Controller
@@ -32,7 +31,8 @@ public class InventoryController {
     private static final String INVENTORY_ALL_VIEW = "inventory/all";
     private static final String INVENTORY_PRODUCT_VIEW = "inventory/product";
     private static final String INVENTORY_CREATE_VIEW = "inventory/create";
-    private static final  String INVENTORY_EDIT_VIEW = "inventory/edit";
+    private static final String INVENTORY_EDIT_VIEW = "inventory/edit";
+    private static final String PRODUCT_DELETE_ERROR_VIEW = "/inventory/errors/product_delete_error";
 
     @GetMapping("/all")
     public String getAllProduct(Model model) throws ExecutionException, InterruptedException {
@@ -79,6 +79,21 @@ public class InventoryController {
         model.addAttribute("product", productDTO);
         model.addAttribute("exceptionMessage", productSaveException.getMessage());
         return INVENTORY_CREATE_VIEW;
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public String deleteProduct(@PathVariable ("id") Integer productId) throws ExecutionException, InterruptedException {
+        log.info("Request delete product. Id {}", productId);
+        ProductDTO productDTO = inventoryService.delete(productId).get();
+        log.info("Product deleted. Id {}",productDTO.getProductId());
+        return "redirect:/inventory/all";
+    }
+
+    @ExceptionHandler (ProductDeleteAbsentException.class)
+    public String failedDeleteProduct(ProductDeleteAbsentException productDeleteAbsentException, Model model) {
+        log.info("Failed delete product, {}", productDeleteAbsentException.getMessage());
+        model.addAttribute("exceptionMessage", productDeleteAbsentException.getMessage());
+        return PRODUCT_DELETE_ERROR_VIEW;
     }
 
 

@@ -15,6 +15,9 @@
         <form th:method="GET" th:action="@{/inventory/edit/{id} (id = ${product.getProductId()})}">
             <input type="submit" value="Edit product">
         </form>
+        <form th:method="DELETE" th:action="@{/inventory/delete/{id} (id = ${product.getProductId()})}">
+            <input type="submit" value="Delete product">
+        </form>
     </div>
 </div>
 
