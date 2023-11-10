@@ -3,25 +3,29 @@ package com.phantom.inventory.models;
 import lombok.*;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "product_in_stock")
+@Table(name = "stock_change")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductInStock {
+public class StockChange {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer stockId;
+    private Integer changeId;
 
     @OneToOne
     @JoinColumn (name = "product_id", referencedColumnName = "id")
     private Product product;
 
-    @Column(name = "quantity")
-    private Integer quantity;
+    @Column(name = "change")
+    private Integer change;
+
+    @Column(name = "timestamp")
+    private LocalDateTime timestamp;
 }

@@ -2,7 +2,7 @@ package com.phantom.client.services;
 
 import com.phantom.client.dto.ProductDTO;
 import com.phantom.client.dto.ProductInStockDTO;
-import com.phantom.client.dto.RecipeRestDTO;
+import com.phantom.client.dto.StockUpdateDTO;
 import com.phantom.client.exceptions.inventoryservice.*;
 import com.phantom.client.exceptions.inventoryservice.resilence.InventoryServiceCircuitException;
 import com.phantom.client.exceptions.inventoryservice.resilence.InventoryServiceException;
@@ -22,6 +22,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -113,6 +114,22 @@ public class InventoryService {
                         uriBuilder -> uriBuilder.queryParam("productId", productId).build())
                 .retrieve()
                 .bodyToMono(Integer.class)
+                .block()
+        );
+    }
+
+    public CompletableFuture<ProductInStockDTO> changeQuantity(StockUpdateDTO stockUpdateDTO) {
+        stockUpdateDTO.setTimestamp(LocalDateTime.now());
+        System.out.println(stockUpdateDTO.getChange());
+        return CompletableFuture.supplyAsync( () ->
+                builder.build()
+                .post()
+                .uri("http://api-gateway/api/v1/product-in-stock/change")
+                .body(Mono.just(stockUpdateDTO), StockUpdateDTO.class)
+                .retrieve()
+                .onStatus(HttpStatus.BAD_REQUEST::equals,
+                        clientResponse -> Mono.error(new ProductStockUpdateException("Stock update exception")))
+                .bodyToMono(ProductInStockDTO.class)
                 .block()
         );
     }

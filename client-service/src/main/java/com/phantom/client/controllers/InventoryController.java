@@ -1,11 +1,10 @@
 package com.phantom.client.controllers;
 
 
-import com.phantom.client.dto.ProductDTO;
-import com.phantom.client.dto.RecipeRestDTO;
-import com.phantom.client.dto.RecipeShowDTO;
+import com.phantom.client.dto.*;
 import com.phantom.client.exceptions.inventoryservice.ProductDeleteException;
 import com.phantom.client.exceptions.inventoryservice.ProductSaveException;
+import com.phantom.client.exceptions.inventoryservice.ProductStockUpdateException;
 import com.phantom.client.exceptions.inventoryservice.ProductUpdateException;
 import com.phantom.client.mappers.RecipeRestToDtoMapper;
 import com.phantom.client.services.InventoryService;
@@ -39,6 +38,8 @@ public class InventoryController {
     private static final String INVENTORY_CREATE_VIEW = "inventory/create";
     private static final String INVENTORY_EDIT_VIEW = "inventory/edit";
     private static final String PRODUCT_DELETE_ERROR_VIEW = "/inventory/errors/product_delete_error";
+    private static final String INVENTORY_DELETE_VIEW = "/inventory/delete";
+    private static final String INVENTORY_STOCK_VIEW = "/inventory/stock";
 
     @GetMapping("/all")
     public String getAllProduct(Model model) throws ExecutionException, InterruptedException {
@@ -97,13 +98,13 @@ public class InventoryController {
         model.addAttribute("recipesWithProduct", recipeShowDTOS);
         model.addAttribute("productId", productId);
         model.addAttribute("quantity", quantity);
-        return "/inventory/delete";
+        return INVENTORY_DELETE_VIEW;
     }
 
     @DeleteMapping("/delete/{id}")
     public String deleteProduct(@PathVariable ("id") Integer productId) throws ExecutionException, InterruptedException {
         log.info("Request delete product. Id {}", productId);
-        ProductDTO productDTO = inventoryService.delete(productId).get();//todo - addview
+        ProductDTO productDTO = inventoryService.delete(productId).get();
         log.info("Product deleted. Id {}",productDTO.getProductId());
         return "redirect:/inventory/all";
     }
@@ -147,5 +148,39 @@ public class InventoryController {
         model.addAttribute("exceptionMessage", productUpdateException.getMessage());
         return INVENTORY_EDIT_VIEW;
     }
+
+    @GetMapping("/quantity/{id}")
+    public String getProductQuantity (@ModelAttribute ("product") ProductDTO productDTO,
+                                      Model model) throws ExecutionException, InterruptedException {
+        Integer productId = productDTO.getProductId();
+        log.info("Requested quantity for product. Id  {}", productId);
+        Integer quantity = inventoryService.getStockForProductId(productId).get();
+        model.addAttribute("quantity", quantity);
+        model.addAttribute("stockUpdate", new StockUpdateDTO());
+        return INVENTORY_STOCK_VIEW;
+    }
+
+    @PostMapping("/change")
+    public String changeProductQuantity(@ModelAttribute ("product") ProductDTO productDTO,
+                                        @ModelAttribute ("stockUpdate") StockUpdateDTO stockUpdateDTO,
+                                        Model model) throws ExecutionException, InterruptedException {
+        Integer productId = productDTO.getProductId();
+        stockUpdateDTO.setProductId(productId);
+        log.info("Requested change quantity for product. Id  {}, change {}", productId, stockUpdateDTO.getChange());
+        ProductInStockDTO changedProductInStockDTO = inventoryService.changeQuantity(stockUpdateDTO).get();
+        Integer quantity = changedProductInStockDTO.getQuantity();
+        model.addAttribute("quantity", quantity);
+        model.addAttribute("stockUpdate", new StockUpdateDTO());
+        return INVENTORY_STOCK_VIEW;
+    }
+
+    @ExceptionHandler(ProductStockUpdateException.class)
+    public String failedChangeStock(ProductStockUpdateException exception,
+                                    Model model) {
+        log.info("Failed change stock {}", exception.getMessage());
+        model.addAttribute("exceptionMessage", exception.getMessage());
+        return "/inventory/errors/inventory_change_stock_error";
+    }
+
 
 }

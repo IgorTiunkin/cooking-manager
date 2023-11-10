@@ -1,6 +1,10 @@
 package com.phantom.inventory.controllers;
 
 import com.phantom.inventory.dto.ProductInStockDTO;
+import com.phantom.inventory.dto.StockUpdateDTO;
+import com.phantom.inventory.exceptions.ProductNotEnoughQuantityException;
+import com.phantom.inventory.exceptions.ProductNotFoundException;
+import com.phantom.inventory.exceptions.ProductStockAlreadyChanged;
 import com.phantom.inventory.models.ProductInStock;
 import com.phantom.inventory.services.ProductInStockService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +32,27 @@ public class ProductInStockController {
         Integer quantityById = productInStockService.getQuantityById(productId);
         log.info("Found {} in stock", quantityById);
         return new ResponseEntity<>(quantityById, HttpStatus.OK);
+    }
+
+    @PostMapping("/change")
+    public ResponseEntity<ProductInStockDTO> changeStock(@RequestBody StockUpdateDTO stockUpdateDTO) {
+        log.info("Request Stock update, id {}, quantity {}", stockUpdateDTO.getProductId(), stockUpdateDTO.getChange());
+        ProductInStock productInStock = productInStockService.updateStock(stockUpdateDTO);
+        log.info("Stock changed. new quantity {}", productInStock.getQuantity());
+        ProductInStockDTO productInStockDTO = convertToProductInStockDTO(productInStock);
+        return new ResponseEntity<>(productInStockDTO, HttpStatus.OK);
+    }
+
+    @ExceptionHandler({ProductNotFoundException.class, ProductNotEnoughQuantityException.class})
+    public ResponseEntity<ProductInStockDTO> failedChangeStock(RuntimeException runtimeException) {
+        log.info("Change stock exception {}", runtimeException.getMessage());
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ProductStockAlreadyChanged.class)
+    public ResponseEntity<ProductInStockDTO> duplicateChangeStock(ProductStockAlreadyChanged productStockAlreadyChanged) {
+        log.info("Change stock exception {}", productStockAlreadyChanged.getMessage());
+        return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
 

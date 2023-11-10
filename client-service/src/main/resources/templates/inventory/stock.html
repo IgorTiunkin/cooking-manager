@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Stock</title>
+</head>
+<body style="background: bisque">
+<div th:replace="allheaders::recipe_header"></div>
+<div>
+    <div style="width: 50%;  margin: 0 auto">
+        <p style="font-size: 26px">Product stock</p>
+        <span th:text="'Product name: ' + ${product.getProductName()}"></span>
+        <br>
+        <span th:text="'Quantity: ' + ${quantity}" ></span>
+        <br>
+        <form th:method="POST" th:action="@{/inventory/change}" th:object="${stockUpdate}">
+            <label for="change" th:text="'Change quantity : + for add / - for reduce'"></label>
+            <input type="text" th:field = "*{change}" id="change">
+            <input type="submit" value="Change quantity">
+            <div th:if="${#fields.hasErrors('change')}" style="color: red" th:errors = "*{change}" ></div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
