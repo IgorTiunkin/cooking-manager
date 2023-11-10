@@ -18,4 +18,8 @@ public class ProductInStockService {
     public List <ProductInStock> getAllStockQuantityById(List<Integer> listOfProductId) {
         return productInStockRepository.findAllByProductIn(listOfProductId);
     }
+
+    public Integer getQuantityById(Integer productId) {
+        return productInStockRepository.getQuantityById(productId).orElse(0);
+    }
 }

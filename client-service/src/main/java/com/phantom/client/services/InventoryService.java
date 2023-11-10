@@ -1,6 +1,7 @@
 package com.phantom.client.services;
 
 import com.phantom.client.dto.ProductDTO;
+import com.phantom.client.dto.ProductInStockDTO;
 import com.phantom.client.dto.RecipeRestDTO;
 import com.phantom.client.exceptions.inventoryservice.*;
 import com.phantom.client.exceptions.inventoryservice.resilence.InventoryServiceCircuitException;
@@ -104,7 +105,17 @@ public class InventoryService {
                 );
     }
 
-
+    public CompletableFuture<Integer> getStockForProductId(Integer productId) {
+        return CompletableFuture.supplyAsync( () ->
+                builder.build()
+                .get()
+                .uri("http://api-gateway/api/v1/product-in-stock/get-by-id",
+                        uriBuilder -> uriBuilder.queryParam("productId", productId).build())
+                .retrieve()
+                .bodyToMono(Integer.class)
+                .block()
+        );
+    }
 
     public CompletableFuture <List <ProductDTO>> inventoryFail (Exception exception) {
         log.info("Fallback method failedGetProducts activated, {}", exception.getMessage());
@@ -128,7 +139,5 @@ public class InventoryService {
         log.info("Fallback method tooManyRequestsToInventory activated, {}", exception.getMessage());
         throw new InventoryServiceTooManyRequestsException("You have done too many requests to inventory. Please try later.");
     }
-
-
 
 }

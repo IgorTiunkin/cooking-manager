@@ -1,4 +1,4 @@
-package com.phantom.inventory.dto;
+package com.phantom.client.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

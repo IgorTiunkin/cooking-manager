@@ -9,13 +9,16 @@
 <div>
     <div style="width: 50%;  margin: 0 auto">
         <div th:if = "${!recipesWithProduct.isEmpty()}" th:text="'This product is still included in these recepies. You must delete them.'"
-        style="font-size: 26px; color: red"></div>
+        style="font-size: 22px; color: red"></div>
         <div th:each="recipe : ${recipesWithProduct}">
             <a th:text="${recipe.getTitle()}"
                th:href="@{/recipe/recipe/{recipe-id} (recipe-id = ${recipe.getRecipeId()})}"></a>
             <br>
         </div>
-        <form th:if="${recipesWithProduct.isEmpty()}"
+        <br>
+        <div th:if="${quantity!=0}" th:text="'Product is still at stock. Please remove. Quantity ' + ${quantity}"
+        style="color: red; font-size: 22px;" ></div>
+        <form th:if="${recipesWithProduct.isEmpty() && quantity==0}"
               th:action="@{/inventory/delete/{id} (id = ${productId})}"
               th:method="DELETE">
             <input type="submit" value="Delete product"/>

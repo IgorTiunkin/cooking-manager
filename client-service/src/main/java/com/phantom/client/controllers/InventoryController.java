@@ -93,8 +93,10 @@ public class InventoryController {
         log.info("Predelete info id {}", productId);
         List<RecipeRestDTO> recipeRestDTOS = recipeService.getAllRecipesByProductId(productId).get();
         List<RecipeShowDTO> recipeShowDTOS = recipeRestToDtoMapper.mapToRecipeShowDto(recipeRestDTOS);
+        Integer quantity = inventoryService.getStockForProductId(productId).get();
         model.addAttribute("recipesWithProduct", recipeShowDTOS);
         model.addAttribute("productId", productId);
+        model.addAttribute("quantity", quantity);
         return "/inventory/delete";
     }
 
