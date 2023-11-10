@@ -1,10 +1,8 @@
 package com.phantom.client.services;
 
 import com.phantom.client.dto.ProductDTO;
-import com.phantom.client.exceptions.inventoryservice.ProductDeleteAbsentException;
-import com.phantom.client.exceptions.inventoryservice.ProductNotFoundException;
-import com.phantom.client.exceptions.inventoryservice.ProductSaveException;
-import com.phantom.client.exceptions.inventoryservice.ProductUpdateException;
+import com.phantom.client.dto.RecipeRestDTO;
+import com.phantom.client.exceptions.inventoryservice.*;
 import com.phantom.client.exceptions.inventoryservice.resilence.InventoryServiceCircuitException;
 import com.phantom.client.exceptions.inventoryservice.resilence.InventoryServiceException;
 import com.phantom.client.exceptions.inventoryservice.resilence.InventoryServiceTimeoutException;
@@ -85,7 +83,8 @@ public class InventoryService {
                         uriBuilder -> uriBuilder.queryParam("productId", productId).build())
                 .retrieve()
                 .onStatus(HttpStatus.BAD_REQUEST::equals,
-                        clientResponse -> Mono.error(new ProductDeleteAbsentException("Product not found. Check if it is still present")))
+                        clientResponse -> Mono.error(new ProductDeleteException("Delete exception", productId)
+                                ))
                 .bodyToMono(ProductDTO.class)
                 .block()
                 );
@@ -104,6 +103,7 @@ public class InventoryService {
                 .block()
                 );
     }
+
 
 
     public CompletableFuture <List <ProductDTO>> inventoryFail (Exception exception) {

@@ -1,7 +1,7 @@
 package com.phantom.inventory.controllers;
 
 import com.phantom.inventory.dto.ProductDTO;
-import com.phantom.inventory.exceptions.ProductDeleteAbsentException;
+import com.phantom.inventory.exceptions.ProductDeleteException;
 import com.phantom.inventory.exceptions.ProductSaveException;
 import com.phantom.inventory.exceptions.ProductUpdateException;
 import com.phantom.inventory.models.Product;
@@ -9,6 +9,7 @@ import com.phantom.inventory.services.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -82,9 +83,9 @@ public class ProductController {
         return new ResponseEntity<>(deletedProductDTO, HttpStatus.OK);
     }
 
-    @ExceptionHandler (ProductDeleteAbsentException.class)
-    public ResponseEntity<ProductDTO> failedDeleteProduct(ProductDeleteAbsentException productDeleteAbsentException){
-        log.info("Delete Failed {}", productDeleteAbsentException.getMessage());
+    @ExceptionHandler (ProductDeleteException.class)
+    public ResponseEntity<ProductDTO> failedDeleteProduct(ProductDeleteException productDeleteException){
+        log.info("Delete Failed {}", productDeleteException.getMessage());
         return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 

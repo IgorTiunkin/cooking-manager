@@ -90,4 +90,17 @@ public class RecipeService {
                 .block()
         );
     }
+
+    public CompletableFuture<List<RecipeRestDTO>> getAllRecipesByProductId(Integer productId) {
+        return CompletableFuture.supplyAsync(() ->
+                builder.build()
+                        .get()
+                        .uri("http://api-gateway/api/v1/recipe/all-by-product",
+                                uriBuilder -> uriBuilder.queryParam("productId", productId).build())
+                        .retrieve()
+                        .bodyToFlux(RecipeRestDTO.class)
+                        .collectList()
+                        .block()
+        );
+    }
 }

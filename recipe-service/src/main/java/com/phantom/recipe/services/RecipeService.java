@@ -51,4 +51,11 @@ public class RecipeService {
     public Optional<Recipe> getRecipeByTitle(String title) {
         return recipeRepository.findRecipeByTitle(title);
     }
+
+
+    public List<RecipeRestDTO> getRecipeByProductId(Integer productId) {
+        List<Integer> allRecipesIdWithProduct = recipeRepository.findAllRecipesIdWithProduct(productId);
+        List<Recipe> allRecipesWithProduct = recipeRepository.findAllByRecipeIdIn(allRecipesIdWithProduct);
+        return recipeDTOMapper.mapToRecipeRestDTOList(allRecipesWithProduct);
+    }
 }

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>All products</title>
+</head>
+<body style="background: bisque">
+<div th:replace="allheaders::recipe_header"></div>
+<div>
+    <div style="width: 50%;  margin: 0 auto">
+        <div th:if = "${!recipesWithProduct.isEmpty()}" th:text="'This product is still included in these recepies. You must delete them.'"
+        style="font-size: 26px; color: red"></div>
+        <div th:each="recipe : ${recipesWithProduct}">
+            <a th:text="${recipe.getTitle()}"
+               th:href="@{/recipe/recipe/{recipe-id} (recipe-id = ${recipe.getRecipeId()})}"></a>
+            <br>
+        </div>
+        <form th:if="${recipesWithProduct.isEmpty()}"
+              th:action="@{/inventory/delete/{id} (id = ${productId})}"
+              th:method="DELETE">
+            <input type="submit" value="Delete product"/>
+        </form>
+    </div>
+</div>
+</body>
+</html>

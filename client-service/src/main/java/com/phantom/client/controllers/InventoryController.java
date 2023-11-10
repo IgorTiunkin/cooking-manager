@@ -2,10 +2,14 @@ package com.phantom.client.controllers;
 
 
 import com.phantom.client.dto.ProductDTO;
-import com.phantom.client.exceptions.inventoryservice.ProductDeleteAbsentException;
+import com.phantom.client.dto.RecipeRestDTO;
+import com.phantom.client.dto.RecipeShowDTO;
+import com.phantom.client.exceptions.inventoryservice.ProductDeleteException;
 import com.phantom.client.exceptions.inventoryservice.ProductSaveException;
 import com.phantom.client.exceptions.inventoryservice.ProductUpdateException;
+import com.phantom.client.mappers.RecipeRestToDtoMapper;
 import com.phantom.client.services.InventoryService;
+import com.phantom.client.services.RecipeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -27,6 +31,8 @@ import java.util.concurrent.ExecutionException;
 public class InventoryController {
 
     private final InventoryService inventoryService;
+    private final RecipeService recipeService;
+    private final RecipeRestToDtoMapper recipeRestToDtoMapper;
 
     private static final String INVENTORY_ALL_VIEW = "inventory/all";
     private static final String INVENTORY_PRODUCT_VIEW = "inventory/product";
@@ -81,18 +87,29 @@ public class InventoryController {
         return INVENTORY_CREATE_VIEW;
     }
 
+    @GetMapping ("/delete/{id}")
+    public String getPreDeleteInfo(@PathVariable ("id") Integer productId,
+                                   Model model) throws ExecutionException, InterruptedException {
+        log.info("Predelete info id {}", productId);
+        List<RecipeRestDTO> recipeRestDTOS = recipeService.getAllRecipesByProductId(productId).get();
+        List<RecipeShowDTO> recipeShowDTOS = recipeRestToDtoMapper.mapToRecipeShowDto(recipeRestDTOS);
+        model.addAttribute("recipesWithProduct", recipeShowDTOS);
+        model.addAttribute("productId", productId);
+        return "/inventory/delete";
+    }
+
     @DeleteMapping("/delete/{id}")
     public String deleteProduct(@PathVariable ("id") Integer productId) throws ExecutionException, InterruptedException {
         log.info("Request delete product. Id {}", productId);
-        ProductDTO productDTO = inventoryService.delete(productId).get();
+        ProductDTO productDTO = inventoryService.delete(productId).get();//todo - addview
         log.info("Product deleted. Id {}",productDTO.getProductId());
         return "redirect:/inventory/all";
     }
 
-    @ExceptionHandler (ProductDeleteAbsentException.class)
-    public String failedDeleteProduct(ProductDeleteAbsentException productDeleteAbsentException, Model model) {
-        log.info("Failed delete product, {}", productDeleteAbsentException.getMessage());
-        model.addAttribute("exceptionMessage", productDeleteAbsentException.getMessage());
+    @ExceptionHandler (ProductDeleteException.class)
+    public String failedDeleteProduct(ProductDeleteException productDeleteException, Model model) {
+        Integer productId = productDeleteException.getProductId();
+        log.info("Failed delete product, id {}", productId);
         return PRODUCT_DELETE_ERROR_VIEW;
     }
 

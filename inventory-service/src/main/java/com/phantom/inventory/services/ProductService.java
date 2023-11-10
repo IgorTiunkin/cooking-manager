@@ -1,6 +1,6 @@
 package com.phantom.inventory.services;
 
-import com.phantom.inventory.exceptions.ProductDeleteAbsentException;
+import com.phantom.inventory.exceptions.ProductDeleteException;
 import com.phantom.inventory.exceptions.ProductSaveException;
 import com.phantom.inventory.exceptions.ProductUpdateException;
 import com.phantom.inventory.models.Product;
@@ -8,9 +8,11 @@ import com.phantom.inventory.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @Transactional(readOnly = true)
@@ -18,6 +20,7 @@ import java.util.Optional;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final WebClient.Builder builder;
 
     public List<Product> getAllById(List <Integer> listOfProductId) {
         return productRepository.findAllByProductIdIn(listOfProductId);
@@ -56,8 +59,9 @@ public class ProductService {
     @Transactional
     public Product delete(Integer productId) {
         Optional<Product> productByID = productRepository.findById(productId);
-        if (productByID.isEmpty()) throw new ProductDeleteAbsentException("Product not found");
+        if (productByID.isEmpty()) throw new ProductDeleteException("Product not found");
         productRepository.delete(productByID.get());
         return productByID.get();
     }
+
 }

@@ -86,4 +86,14 @@ public class RecipeController {
         return new ResponseEntity<>(recipeRestDTO, HttpStatus.BAD_REQUEST);
     }
 
+    @GetMapping("/all-by-product")
+    public ResponseEntity <List <RecipeRestDTO>> getAllRecipesByProduct(
+            @RequestParam ("productId") Integer productId) {
+        log.info("Request all recipes by product. Id {}", productId);
+        List<RecipeRestDTO> recipeByProductId = recipeService.getRecipeByProductId(productId);
+        return new ResponseEntity<>(recipeByProductId, HttpStatus.OK);
+    }
+
+
+
 }
