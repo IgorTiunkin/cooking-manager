@@ -22,6 +22,7 @@
 <div th:replace="allheaders::recipe_header"></div>
 <div>
     <div style="width: 50%;  margin: 0 auto">
+        <p style="font-size: 26px">Create recipe</p>
     <form th:method="POST" th:action="@{/recipe/save}" th:object="${recipe}">
         <label for="title">Choose recipe name</label>
         <input type="text" th:field = "*{title}" id = "title"/>

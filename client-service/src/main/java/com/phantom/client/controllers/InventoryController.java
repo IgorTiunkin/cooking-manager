@@ -3,6 +3,7 @@ package com.phantom.client.controllers;
 
 import com.phantom.client.dto.ProductDTO;
 import com.phantom.client.dto.RecipeShowDTO;
+import com.phantom.client.exceptions.inventoryservice.ProductSaveException;
 import com.phantom.client.exceptions.inventoryservice.ProductUpdateException;
 import com.phantom.client.services.InventoryService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -27,14 +29,58 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
 
+    private static final String INVENTORY_ALL_VIEW = "inventory/all";
+    private static final String INVENTORY_PRODUCT_VIEW = "inventory/product";
+    private static final String INVENTORY_CREATE_VIEW = "inventory/create";
+    private static final  String INVENTORY_EDIT_VIEW = "inventory/edit";
+
+    @GetMapping("/all")
+    public String getAllProduct(Model model) throws ExecutionException, InterruptedException {
+        log.info("Requested all products");
+        List<ProductDTO> productDTOS = inventoryService.getAllProducts().get();
+        model.addAttribute("products", productDTOS);
+        return INVENTORY_ALL_VIEW;
+    }
+
     @GetMapping("/product/{id}")
     public String getProductById(@PathVariable ("id") Integer productId,
                                  Model model) throws ExecutionException, InterruptedException {
         ProductDTO productDTO = inventoryService.getProductById(productId).get();
         log.info("Get product by id = {}", productDTO.getProductId());
         model.addAttribute("product", productDTO);
-        return "inventory/product";
+        return INVENTORY_PRODUCT_VIEW;
     }
+
+    @GetMapping("/create")
+    public String getCreationBlank(Model model) {
+        log.info("Requested creation blank");
+        model.addAttribute("product", new ProductDTO());
+        return INVENTORY_CREATE_VIEW;
+    }
+
+    @PostMapping("/save")
+    public String saveProduct(@ModelAttribute ("product") @Valid ProductDTO productDTO,
+                              BindingResult bindingResult) throws ExecutionException, InterruptedException {
+        log.info("Request save product. Name {}", productDTO.getProductName());
+        if (bindingResult.hasErrors()) {
+            return INVENTORY_CREATE_VIEW;
+        }
+        ProductDTO savedProductDTO = inventoryService.save(productDTO).get();
+        log.info("Product successfully saved. Id {}", savedProductDTO.getProductId());
+        return "redirect:/inventory/all";
+    }
+
+    @ExceptionHandler (ProductSaveException.class)
+    public String failedUpdate(WebRequest request, HttpSession session,
+                               ProductSaveException productSaveException,
+                               Model model) {
+        ProductDTO productDTO = (ProductDTO) session.getAttribute("product");
+        log.info("Failed save product. Name {}", productDTO.getProductName());
+        model.addAttribute("product", productDTO);
+        model.addAttribute("exceptionMessage", productSaveException.getMessage());
+        return INVENTORY_CREATE_VIEW;
+    }
+
 
     @GetMapping("/edit/{id}")
     public String editProduct(@PathVariable ("id") Integer productId,
@@ -42,7 +88,7 @@ public class InventoryController {
                               Model model) {
         log.info("Request for update product. Name {}", productDTO.getProductName());
         model.addAttribute("product", productDTO);
-        return "inventory/edit";
+        return INVENTORY_EDIT_VIEW;
     }
 
     @PostMapping("/edit")
@@ -50,7 +96,7 @@ public class InventoryController {
                                   BindingResult bindingResult) throws ExecutionException, InterruptedException {
         log.info("Edit product request. Id = {}", productDTO.getProductId());
         if (bindingResult.hasErrors()) {
-            return "inventory/edit";
+            return INVENTORY_EDIT_VIEW;
         }
         ProductDTO editProduct = inventoryService.updateProduct(productDTO).get();
         log.info("Product successfully edit. Id = {}", editProduct.getProductId());
@@ -65,7 +111,7 @@ public class InventoryController {
         log.info("Failed update product. Id {}", productDTO.getProductId());
         model.addAttribute("product", productDTO);
         model.addAttribute("exceptionMessage", productUpdateException.getMessage());
-        return "inventory/edit";
+        return INVENTORY_EDIT_VIEW;
     }
 
 }

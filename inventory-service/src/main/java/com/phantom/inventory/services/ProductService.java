@@ -1,5 +1,6 @@
 package com.phantom.inventory.services;
 
+import com.phantom.inventory.exceptions.ProductSaveException;
 import com.phantom.inventory.exceptions.ProductUpdateException;
 import com.phantom.inventory.models.Product;
 import com.phantom.inventory.repositories.ProductRepository;
@@ -30,6 +31,15 @@ public class ProductService {
     }
 
     @Transactional
+    public Product save(Product product) {
+        Optional<Product> productByName = getByName(product.getProductName());
+        if (productByName.isEmpty()) return productRepository.save(product);
+        Product productFromDbByName = productByName.get();
+        if (product.getProductId().equals(productFromDbByName.getProductId())) return productRepository.save(product);
+        throw new ProductSaveException("Such product name already present");
+    }
+
+    @Transactional
     public Product update(Product product) {
         Optional<Product> productByName = getByName(product.getProductName());
         if (productByName.isEmpty()) return productRepository.save(product);
@@ -41,4 +51,6 @@ public class ProductService {
     public Optional <Product> getByName(String name) {
         return productRepository.findByProductName(name);
     }
+
+
 }

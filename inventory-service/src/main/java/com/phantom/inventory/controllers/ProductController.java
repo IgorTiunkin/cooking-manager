@@ -1,6 +1,7 @@
 package com.phantom.inventory.controllers;
 
 import com.phantom.inventory.dto.ProductDTO;
+import com.phantom.inventory.exceptions.ProductSaveException;
 import com.phantom.inventory.exceptions.ProductUpdateException;
 import com.phantom.inventory.models.Product;
 import com.phantom.inventory.services.ProductService;
@@ -53,6 +54,22 @@ public class ProductController {
         ProductDTO productDTO = convertToProductDTO(product);
         log.info("Product found. Id = {}", productId);
         return new ResponseEntity<>(productDTO, HttpStatus.OK);
+    }
+
+    @PostMapping("/save")
+    public ResponseEntity <ProductDTO> saveProduct(@RequestBody ProductDTO productDTO) {
+        log.info("Request save product. Name {}", productDTO.getProductName());
+        Product product = convertToProduct(productDTO);
+        Product savedProduct = productService.save(product);
+        ProductDTO savedProductDTO = convertToProductDTO(savedProduct);
+        log.info("Save product. Id: {}", savedProductDTO.getProductId());
+        return new ResponseEntity<>(savedProductDTO, HttpStatus.OK);
+    }
+
+    @ExceptionHandler (ProductSaveException.class)
+    public ResponseEntity <ProductDTO> failedSaveProduct(ProductSaveException productSaveException) {
+        log.info("Save failed. {}", productSaveException.getMessage());
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping ("/update")
