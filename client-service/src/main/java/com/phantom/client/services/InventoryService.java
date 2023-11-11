@@ -120,7 +120,6 @@ public class InventoryService {
 
     public CompletableFuture<ProductInStockDTO> changeQuantity(StockUpdateDTO stockUpdateDTO) {
         stockUpdateDTO.setTimestamp(LocalDateTime.now());
-        System.out.println(stockUpdateDTO.getChange());
         return CompletableFuture.supplyAsync( () ->
                 builder.build()
                 .post()

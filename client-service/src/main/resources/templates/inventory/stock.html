@@ -14,11 +14,14 @@
         <span th:text="'Quantity: ' + ${quantity}" ></span>
         <br>
         <form th:method="POST" th:action="@{/inventory/change}" th:object="${stockUpdate}">
-            <label for="change" th:text="'Change quantity : + for add / - for reduce'"></label>
+            <label for="change">Change quantity</label>
             <input type="text" th:field = "*{change}" id="change">
             <input type="submit" value="Change quantity">
             <div th:if="${#fields.hasErrors('change')}" style="color: red" th:errors = "*{change}" ></div>
         </form>
+        <br>
+        <p style="color: blue">If you wan to add quantity - insert positive number, remove - negative number.</p>
+        <p style="color: blue">Number should be in interval from -1 000 000 000 to 1 000 000 000</p>
     </div>
 </div>
 

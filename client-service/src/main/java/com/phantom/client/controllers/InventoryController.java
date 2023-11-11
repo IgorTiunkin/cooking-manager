@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutionException;
 @RequestMapping("/inventory")
 @RequiredArgsConstructor
 @Slf4j
-@SessionAttributes("product")
+@SessionAttributes({"product", "quantity"})
 public class InventoryController {
 
     private final InventoryService inventoryService;
@@ -162,8 +162,14 @@ public class InventoryController {
 
     @PostMapping("/change")
     public String changeProductQuantity(@ModelAttribute ("product") ProductDTO productDTO,
-                                        @ModelAttribute ("stockUpdate") StockUpdateDTO stockUpdateDTO,
+                                        @ModelAttribute ("stockUpdate") @Valid StockUpdateDTO stockUpdateDTO,
+                                        BindingResult bindingResult,
+                                        @ModelAttribute ("quantity") Integer currentQuantity,
                                         Model model) throws ExecutionException, InterruptedException {
+        if (bindingResult.hasErrors()){
+            log.info("Wrong change quantity");
+            return INVENTORY_STOCK_VIEW;
+        }
         Integer productId = productDTO.getProductId();
         stockUpdateDTO.setProductId(productId);
         log.info("Requested change quantity for product. Id  {}, change {}", productId, stockUpdateDTO.getChange());
