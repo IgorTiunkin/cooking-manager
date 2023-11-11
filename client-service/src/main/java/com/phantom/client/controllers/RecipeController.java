@@ -186,4 +186,32 @@ public class RecipeController {
         return RECIPE_EDIT_VIEW;
     }
 
+    @GetMapping("/prepare/{id}")
+    public String getPrePreparationInfo(@PathVariable ("id") Integer recipeId,
+                                        @ModelAttribute("recipe") RecipeShowDTO recipeShowDTO,
+                                        Model model) throws ExecutionException, InterruptedException {
+        log.info("Request preparation info fpr recipe {}", recipeId);
+        RecipeRestDTO recipeRestDTO = recipeRestToDtoMapper.convertToRecipeRestDTO(recipeShowDTO);
+        List<ProductsForPrepareDTO> productsForPrepareDTOS = inventoryService.getStockForProducts(recipeRestDTO).get();
+        productsForPrepareDTOS.forEach(productsForPrepareDTO ->
+                productsForPrepareDTO.setNeededQuantity
+                        (this.getNeededQuantityFromRecipe(recipeShowDTO, productsForPrepareDTO)));
+
+        RecipePrepareDTO recipePrepareDTO = RecipePrepareDTO.builder()
+                .recipeId(recipeShowDTO.getRecipeId())
+                .title(recipeShowDTO.getTitle())
+                .actions(recipeShowDTO.getActions())
+                .productsForPrepareDTOS(productsForPrepareDTOS)
+                .build();
+        model.addAttribute("recipe_prepare", recipePrepareDTO);
+        return "/recipe/preparation_info";
+    }
+
+    private Integer getNeededQuantityFromRecipe(RecipeShowDTO recipeShowDTO, ProductsForPrepareDTO productsForPrepareDTO) {
+        Integer productId = productsForPrepareDTO.getProductId();
+        return recipeShowDTO.getUsedProducts().entrySet().stream()
+                .filter(entry -> entry.getKey().getProductId() == productId)
+                .findAny().get().getValue();
+    }
+
 }

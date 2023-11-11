@@ -27,7 +27,7 @@ public class ProductInStockService {
     private final StockChangeRepository stockChangeRepository;
     private final ProductRepository productRepository;
 
-    public List <ProductInStock> getAllStockQuantityById(List<Integer> listOfProductId) {
+    public List <ProductInStock> getProductInStockByIds(List<Integer> listOfProductId) {
         return productInStockRepository.findAllByProductIn(listOfProductId);
     }
 

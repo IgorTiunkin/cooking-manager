@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Preparation info</title>
+</head>
+<body style="background: bisque">
+<div th:replace="allheaders::recipe_header"></div>
+<div>
+    <div style="width: 50%;  margin: 0 auto">
+        <p th:text="${recipe_prepare.getTitle()}" style="font-size: 26px; color: green"></p>
+        <span style="font-size: 20px" >Products</span>
+        <br> <br>
+        <div th:each="entry:${recipe_prepare.getProductsForPrepareDTOS()}">
+            <a th:href="@{/inventory/product/{id} (id = ${entry.getProductId()})}"
+               th:text="${entry.getProductName()}"></a>
+            <span th:text="' - ' + ${entry.getCurrentQuantity()} + ' - ' + ${entry.getNeededQuantity()}"></span>
+        </div>
+        <br>
+        <span style="font-size: 20px">Actions</span>
+        <p th:text="${recipe_prepare.getActions()}"></p>
+        <br>
+        <form th:action="@{/recipe/prepare/save}"
+              th:method="POST">
+            <input type="submit" value="Prepare recipe">
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

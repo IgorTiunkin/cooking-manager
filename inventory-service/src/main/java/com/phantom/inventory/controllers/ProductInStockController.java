@@ -1,10 +1,12 @@
 package com.phantom.inventory.controllers;
 
 import com.phantom.inventory.dto.ProductInStockDTO;
+import com.phantom.inventory.dto.ProductsForPrepareDTO;
 import com.phantom.inventory.dto.StockUpdateDTO;
 import com.phantom.inventory.exceptions.ProductNotEnoughQuantityException;
 import com.phantom.inventory.exceptions.ProductNotFoundException;
 import com.phantom.inventory.exceptions.ProductStockAlreadyChanged;
+import com.phantom.inventory.mappers.ProductInStockToPrepareDTOMapper;
 import com.phantom.inventory.models.ProductInStock;
 import com.phantom.inventory.services.ProductInStockService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class ProductInStockController {
 
     private final ProductInStockService productInStockService;
     private final ModelMapper modelMapper;
+    private final ProductInStockToPrepareDTOMapper productInStockToPrepareDTOMapper;
 
     @GetMapping("/get-by-id")
     public ResponseEntity <Integer> getProductInStockById(@RequestParam ("productId") Integer productId) {
@@ -55,13 +58,14 @@ public class ProductInStockController {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
-
-    @GetMapping("/check-stock")
-    @ResponseStatus(HttpStatus.OK)
-    public List<ProductInStockDTO> getAllStockForIds (@RequestBody List <Integer> listOfProductId) {
-        List<ProductInStock> allStockQuantityById = productInStockService.getAllStockQuantityById(listOfProductId);
-        return allStockQuantityById.stream().map(this::convertToProductInStockDTO)
+    @GetMapping("/stocks")
+    public ResponseEntity<List <ProductsForPrepareDTO>> getStocksForProductIds(
+            @RequestParam ("productIds") List <Integer> productIds) {
+        log.info("Requested product in stock by ids {}", productIds);
+        List<ProductInStock> productInStockByIds = productInStockService.getProductInStockByIds(productIds);
+        List<ProductsForPrepareDTO> productsForPrepareDTOS = productInStockByIds.stream().map(productInStockToPrepareDTOMapper::convertToPrepareDto)
                 .collect(Collectors.toList());
+        return new ResponseEntity<>(productsForPrepareDTOS, HttpStatus.OK);
     }
 
     private ProductInStockDTO convertToProductInStockDTO(ProductInStock productInStock) {

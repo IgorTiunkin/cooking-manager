@@ -22,11 +22,15 @@
         <br>
         <form th:action="@{/recipe/delete/{id} (id = ${recipe.getRecipeId()})}"
          th:method="DELETE">
-            <input type="submit" value="Delete receipt">
+            <input type="submit" value="Delete recipe">
         </form>
         <form th:action="@{/recipe/edit/{id} (id = ${recipe.getRecipeId()})}"
               th:method="GET">
-            <input type="submit" value="Edit receipt">
+            <input type="submit" value="Edit recipe">
+        </form>
+        <form th:action="@{/recipe/prepare/{id} (id = ${recipe.getRecipeId()})}"
+              th:method="GET">
+            <input type="submit" value="Prepare recipe">
         </form>
     </div>
 </div>

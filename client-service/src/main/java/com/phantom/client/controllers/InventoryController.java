@@ -40,6 +40,7 @@ public class InventoryController {
     private static final String PRODUCT_DELETE_ERROR_VIEW = "/inventory/errors/product_delete_error";
     private static final String INVENTORY_DELETE_VIEW = "/inventory/delete";
     private static final String INVENTORY_STOCK_VIEW = "/inventory/stock";
+    private static final String CHANGE_STOCK_ERROR_VIEW = "/inventory/errors/inventory_change_stock_error";
 
     @GetMapping("/all")
     public String getAllProduct(Model model) throws ExecutionException, InterruptedException {
@@ -185,7 +186,7 @@ public class InventoryController {
                                     Model model) {
         log.info("Failed change stock {}", exception.getMessage());
         model.addAttribute("exceptionMessage", exception.getMessage());
-        return "/inventory/errors/inventory_change_stock_error";
+        return CHANGE_STOCK_ERROR_VIEW;
     }
 
 

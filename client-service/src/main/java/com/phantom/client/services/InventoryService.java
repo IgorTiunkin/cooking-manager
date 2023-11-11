@@ -1,8 +1,6 @@
 package com.phantom.client.services;
 
-import com.phantom.client.dto.ProductDTO;
-import com.phantom.client.dto.ProductInStockDTO;
-import com.phantom.client.dto.StockUpdateDTO;
+import com.phantom.client.dto.*;
 import com.phantom.client.exceptions.inventoryservice.*;
 import com.phantom.client.exceptions.inventoryservice.resilence.InventoryServiceCircuitException;
 import com.phantom.client.exceptions.inventoryservice.resilence.InventoryServiceException;
@@ -27,6 +25,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -133,6 +132,22 @@ public class InventoryService {
         );
     }
 
+    public CompletableFuture<List<ProductsForPrepareDTO>> getStockForProducts(RecipeRestDTO recipeRestDTO) {
+        List<Integer> productIds = recipeRestDTO.getProductAndQuantityDTOList().stream()
+                .map(ProductAndQuantityDTO::getProductId)
+                .collect(Collectors.toList());
+        return CompletableFuture.supplyAsync( () ->
+                builder.build()
+                .get()
+                .uri("http://api-gateway/api/v1/product-in-stock/stocks",
+                        uriBuilder -> uriBuilder.queryParam("productIds", productIds).build())
+                .retrieve()
+                .bodyToFlux(ProductsForPrepareDTO.class)
+                .collectSortedList(Comparator.comparing(ProductsForPrepareDTO::getProductName))
+                .block()
+        );
+    }
+
     public CompletableFuture <List <ProductDTO>> inventoryFail (Exception exception) {
         log.info("Fallback method failedGetProducts activated, {}", exception.getMessage());
         if (exception instanceof WebClientResponseException) {
@@ -155,5 +170,6 @@ public class InventoryService {
         log.info("Fallback method tooManyRequestsToInventory activated, {}", exception.getMessage());
         throw new InventoryServiceTooManyRequestsException("You have done too many requests to inventory. Please try later.");
     }
+
 
 }

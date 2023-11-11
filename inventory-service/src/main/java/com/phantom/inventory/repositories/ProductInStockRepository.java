@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface ProductInStockRepository extends JpaRepository <ProductInStock, Integer> {
-    @Query("SELECT c FROM ProductInStock c WHERE c.stockId IN ?1")
+    @Query("SELECT c FROM ProductInStock c WHERE c.product.productId IN ?1")
     List<ProductInStock> findAllByProductIn(List <Integer> idList);
 
     @Query("SELECT c.quantity FROM ProductInStock c WHERE c.product.productId = ?1")
