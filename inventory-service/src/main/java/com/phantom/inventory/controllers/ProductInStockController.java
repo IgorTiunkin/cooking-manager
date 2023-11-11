@@ -63,7 +63,8 @@ public class ProductInStockController {
             @RequestParam ("productIds") List <Integer> productIds) {
         log.info("Requested product in stock by ids {}", productIds);
         List<ProductInStock> productInStockByIds = productInStockService.getProductInStockByIds(productIds);
-        List<ProductsForPrepareDTO> productsForPrepareDTOS = productInStockByIds.stream().map(productInStockToPrepareDTOMapper::convertToPrepareDto)
+        List<ProductsForPrepareDTO> productsForPrepareDTOS = productInStockByIds.stream()
+                .map(productInStockToPrepareDTOMapper::convertToPrepareDto)
                 .collect(Collectors.toList());
         return new ResponseEntity<>(productsForPrepareDTOS, HttpStatus.OK);
     }

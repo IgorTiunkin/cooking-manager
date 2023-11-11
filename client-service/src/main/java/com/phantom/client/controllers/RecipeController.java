@@ -21,6 +21,7 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 @Controller
@@ -204,6 +205,11 @@ public class RecipeController {
                 .productsForPrepareDTOS(productsForPrepareDTOS)
                 .build();
         model.addAttribute("recipe_prepare", recipePrepareDTO);
+        Optional<ProductsForPrepareDTO> impossibleProduct = recipePrepareDTO.getProductsForPrepareDTOS().stream()
+                .filter(product -> product.getNeededQuantity() > product.getCurrentQuantity())
+                .findAny();
+        Boolean canPrepare = impossibleProduct.isEmpty();
+        model.addAttribute("can_prepare", canPrepare);
         return "/recipe/preparation_info";
     }
 
@@ -213,5 +219,7 @@ public class RecipeController {
                 .filter(entry -> entry.getKey().getProductId() == productId)
                 .findAny().get().getValue();
     }
+
+
 
 }

@@ -11,16 +11,31 @@
         <p th:text="${recipe_prepare.getTitle()}" style="font-size: 26px; color: green"></p>
         <span style="font-size: 20px" >Products</span>
         <br> <br>
-        <div th:each="entry:${recipe_prepare.getProductsForPrepareDTOS()}">
-            <a th:href="@{/inventory/product/{id} (id = ${entry.getProductId()})}"
-               th:text="${entry.getProductName()}"></a>
-            <span th:text="' - ' + ${entry.getCurrentQuantity()} + ' - ' + ${entry.getNeededQuantity()}"></span>
-        </div>
+        <table rules="all">
+            <tbody style="text-align: right">
+            <tr>
+                <th>Product</th>
+                <th>Needed quantity</th>
+                <th>Current quantity</th>
+                <th>Comment</th>
+            </tr>
+            <tr th:each="entry:${recipe_prepare.getProductsForPrepareDTOS()}" >
+                <td>
+                    <a th:href="@{/inventory/product/{id} (id = ${entry.getProductId()})}"
+                       th:text="${entry.getProductName()}"></a>
+                </td>
+                <td th:text = "${entry.getNeededQuantity()}"></td>
+                <td th:text = "${entry.getCurrentQuantity()}"></td>
+                <td th:if = "${entry.getNeededQuantity()>entry.getCurrentQuantity()}"
+                th:text="'Not enough quantity'" style="color: red"></td>
+            </tr>
+            </tbody>
+        </table>
         <br>
         <span style="font-size: 20px">Actions</span>
         <p th:text="${recipe_prepare.getActions()}"></p>
         <br>
-        <form th:action="@{/recipe/prepare/save}"
+        <form th:if = "${can_prepare}" th:action="@{/recipe/prepare/save}"
               th:method="POST">
             <input type="submit" value="Prepare recipe">
         </form>
