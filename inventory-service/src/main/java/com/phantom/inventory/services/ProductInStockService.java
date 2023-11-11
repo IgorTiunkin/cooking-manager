@@ -1,5 +1,7 @@
 package com.phantom.inventory.services;
 
+import com.phantom.inventory.dto.ProductAndQuantityDTO;
+import com.phantom.inventory.dto.RecipeCookingOrderDTO;
 import com.phantom.inventory.exceptions.ProductNotEnoughQuantityException;
 import com.phantom.inventory.dto.StockUpdateDTO;
 import com.phantom.inventory.exceptions.ProductNotFoundException;
@@ -15,8 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -67,5 +72,44 @@ public class ProductInStockService {
         productInStockRepository.save(productInStock);
 
         return productInStock;
+    }
+
+    @Transactional
+    public void bookStock(RecipeCookingOrderDTO recipeCookingOrderDTO) {
+        //check timestamp
+        LocalDateTime timestamp = recipeCookingOrderDTO.getTimestamp();
+        Optional<StockChange> stockChangeRepositoryByTimestamp = stockChangeRepository.findByTimestamp(timestamp);
+        if (stockChangeRepositoryByTimestamp.isPresent()) throw new ProductStockAlreadyChanged("this recipe already book");
+
+
+        //Get list of productId
+        List<ProductAndQuantityDTO> bookOrder = recipeCookingOrderDTO.getProductAndQuantityDTOList();
+        List<Integer> productIdList = bookOrder.stream()
+                .map(ProductAndQuantityDTO::getProductId).collect(Collectors.toList());
+
+        //create stock map to check
+        List<ProductInStock> currentStock = productInStockRepository.findAllByProductIn(productIdList);
+        Map<Integer, Integer> stockMap = new HashMap<>();
+        currentStock.forEach(entry -> stockMap.put(entry.getProduct().getProductId(), entry.getQuantity()));
+
+        //double check avaiability
+        Optional<ProductAndQuantityDTO> impossibleProduct = bookOrder.stream()
+                .filter(entry -> entry.getQuantity() > stockMap.getOrDefault(entry.getProductId(), 0))
+                .findAny();
+        if (impossibleProduct.isPresent()) throw new ProductNotEnoughQuantityException("Not enough to prepare");
+
+        //create change map
+        Map<Integer, Integer> changeMap = new HashMap<>();
+        bookOrder.forEach(entry -> changeMap.put(entry.getProductId(), entry.getQuantity()));
+
+        //set new quantity and save
+        currentStock.forEach(entry ->
+                entry.setQuantity(entry.getQuantity()-changeMap.get(entry.getProduct().getProductId())));
+        currentStock.forEach(productInStockRepository::save);
+
+        //register change
+        bookOrder.forEach(entry ->
+                stockChangeRepository.addStockChange(entry.getProductId(), -entry.getQuantity(), timestamp));
+
     }
 }

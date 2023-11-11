@@ -148,6 +148,31 @@ public class InventoryService {
         );
     }
 
+
+    public CompletableFuture<RecipeCookingOrderDTO> bookProductsToCook(RecipeRestDTO recipeRestDTO) {
+        //create recipe order
+        List<ProductAndQuantityDTO> productAndQuantityDTOList = recipeRestDTO.getProductAndQuantityDTOList();
+        RecipeCookingOrderDTO cookingOrderDTO = RecipeCookingOrderDTO.builder()
+                .recipeId(recipeRestDTO.getRecipeId())
+                .title(recipeRestDTO.getTitle())
+                .productAndQuantityDTOList(productAndQuantityDTOList)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+
+        return CompletableFuture.supplyAsync( () ->
+                builder.build()
+                .post()
+                .uri("http://api-gateway/api/v1/product-in-stock/book-order")
+                .body(Mono.just(cookingOrderDTO), RecipeCookingOrderDTO.class)
+                .retrieve()
+                .onStatus(HttpStatus.BAD_REQUEST::equals,
+                        clientResponse -> Mono.error(new ProductBookingException("something went wrong")))
+                        .bodyToMono(RecipeCookingOrderDTO.class)
+                .block()
+        );
+    }
+
     public CompletableFuture <List <ProductDTO>> inventoryFail (Exception exception) {
         log.info("Fallback method failedGetProducts activated, {}", exception.getMessage());
         if (exception instanceof WebClientResponseException) {

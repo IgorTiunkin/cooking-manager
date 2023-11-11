@@ -2,6 +2,7 @@ package com.phantom.inventory.controllers;
 
 import com.phantom.inventory.dto.ProductInStockDTO;
 import com.phantom.inventory.dto.ProductsForPrepareDTO;
+import com.phantom.inventory.dto.RecipeCookingOrderDTO;
 import com.phantom.inventory.dto.StockUpdateDTO;
 import com.phantom.inventory.exceptions.ProductNotEnoughQuantityException;
 import com.phantom.inventory.exceptions.ProductNotFoundException;
@@ -72,4 +73,14 @@ public class ProductInStockController {
     private ProductInStockDTO convertToProductInStockDTO(ProductInStock productInStock) {
         return modelMapper.map(productInStock, ProductInStockDTO.class);
     }
+
+    @PostMapping ("/book-order")
+    public ResponseEntity <RecipeCookingOrderDTO> bookStock(@RequestBody RecipeCookingOrderDTO recipeCookingOrderDTO) {
+        log.info("Request book fo recipe id {}", recipeCookingOrderDTO.getRecipeId());
+        productInStockService.bookStock(recipeCookingOrderDTO);
+        return new ResponseEntity<>(recipeCookingOrderDTO, HttpStatus.OK);
+    }
+
+
+
 }

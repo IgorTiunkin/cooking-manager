@@ -1,6 +1,7 @@
 package com.phantom.client.controllers;
 
 import com.phantom.client.dto.*;
+import com.phantom.client.exceptions.inventoryservice.ProductBookingException;
 import com.phantom.client.exceptions.receiptservice.DeleteFailedException;
 import com.phantom.client.exceptions.receiptservice.UpdateFailedException;
 import com.phantom.client.exceptions.inventoryservice.resilence.InventoryServiceException;
@@ -42,6 +43,7 @@ public class RecipeController {
     private static final String WELCOME_VIEW = "recipe/welcome";
     private static final String RECIPE_DELETE_ERROR_VIEW = "recipe/errors/recipe_delete_error";
     private static final String RECIPE_EDIT_VIEW = "recipe/edit";
+    private static final String RECIPE_PREPARATION_INFO_VIEW = "/recipe/preparation_info";
 
     @GetMapping
     public String welcome() {
@@ -210,8 +212,9 @@ public class RecipeController {
                 .findAny();
         Boolean canPrepare = impossibleProduct.isEmpty();
         model.addAttribute("can_prepare", canPrepare);
-        return "/recipe/preparation_info";
+        return RECIPE_PREPARATION_INFO_VIEW;
     }
+
 
     private Integer getNeededQuantityFromRecipe(RecipeShowDTO recipeShowDTO, ProductsForPrepareDTO productsForPrepareDTO) {
         Integer productId = productsForPrepareDTO.getProductId();
@@ -219,6 +222,23 @@ public class RecipeController {
                 .filter(entry -> entry.getKey().getProductId() == productId)
                 .findAny().get().getValue();
     }
+
+    @PostMapping ("/prepare/save")
+    public String bookPreparedRecipe(@ModelAttribute ("recipe") RecipeShowDTO recipeShowDTO)
+            throws ExecutionException, InterruptedException {
+        log.info("Request prepare recipe id {}", recipeShowDTO.getRecipeId());
+        RecipeRestDTO recipeRestDTO = recipeRestToDtoMapper.convertToRecipeRestDTO(recipeShowDTO);
+        RecipeCookingOrderDTO recipeCookingOrderDTO = inventoryService.bookProductsToCook(recipeRestDTO).get();
+        return "/recipe/book_success";
+    }
+
+    @ExceptionHandler(ProductBookingException.class)
+    public String failedBooking(ProductBookingException productBookingException) {
+        log.info("Failed booking");
+        return "/recipe/errors/book_failed";
+    }
+
+
 
 
 
