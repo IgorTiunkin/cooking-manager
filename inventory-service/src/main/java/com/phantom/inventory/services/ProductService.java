@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutionException;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final WebClient.Builder builder;
 
     public List<Product> getAllById(List <Integer> listOfProductId) {
         return productRepository.findAllByProductIdIn(listOfProductId);
@@ -36,10 +35,13 @@ public class ProductService {
 
     @Transactional
     public Product save(Product product) {
+        //If product with such name absent - save
         Optional<Product> productByName = getByName(product.getProductName());
         if (productByName.isEmpty()) return productRepository.save(product);
+
+        //if present - if absolute copy - ignore, else - block save if exception
         Product productFromDbByName = productByName.get();
-        if (product.getProductId().equals(productFromDbByName.getProductId())) return productRepository.save(product);
+        if (product.equals(productFromDbByName)) return productFromDbByName;
         throw new ProductSaveException("Such product name already present");
     }
 

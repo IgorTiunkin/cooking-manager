@@ -34,8 +34,6 @@ public class ProductController {
         return allProducts.stream().map(this::convertToProductDTO).collect(Collectors.toList());
     }
 
-
-
     @GetMapping ("/in")
     @ResponseStatus(HttpStatus.OK)
     public List<ProductDTO> getProductsIn(@RequestParam ("recipeIds") Set <Integer> productIdList) {
@@ -60,9 +58,12 @@ public class ProductController {
 
     @PostMapping("/save")
     public ResponseEntity <ProductDTO> saveProduct(@RequestBody ProductDTO productDTO) {
+        //Convert to product and save
         log.info("Request save product. Name {}", productDTO.getProductName());
         Product product = convertToProduct(productDTO);
         Product savedProduct = productService.save(product);
+
+        //Convert to DTO and return
         ProductDTO savedProductDTO = convertToProductDTO(savedProduct);
         log.info("Save product. Id: {}", savedProductDTO.getProductId());
         return new ResponseEntity<>(savedProductDTO, HttpStatus.OK);
