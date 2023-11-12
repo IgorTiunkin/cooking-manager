@@ -24,4 +24,7 @@ public class ProductInStock {
 
     @Column(name = "quantity")
     private Integer quantity;
+
+    @Column(name = "recommended_quantity")
+    private Integer recommendedQuantity;
 }

@@ -173,6 +173,19 @@ public class InventoryService {
         );
     }
 
+    public CompletableFuture<List<ProductInStockDTO>> checkReplenishment() {
+        return CompletableFuture.supplyAsync( () ->
+                builder.build()
+                .get()
+                .uri("http://api-gateway/api/v1/product-in-stock/check-replenishment")
+                .retrieve()
+                .bodyToFlux(ProductInStockDTO.class)
+                .collectList()
+                .block()
+        );
+    }
+
+
     public CompletableFuture <List <ProductDTO>> inventoryFail (Exception exception) {
         log.info("Fallback method failedGetProducts activated, {}", exception.getMessage());
         if (exception instanceof WebClientResponseException) {
@@ -195,6 +208,7 @@ public class InventoryService {
         log.info("Fallback method tooManyRequestsToInventory activated, {}", exception.getMessage());
         throw new InventoryServiceTooManyRequestsException("You have done too many requests to inventory. Please try later.");
     }
+
 
 
 }

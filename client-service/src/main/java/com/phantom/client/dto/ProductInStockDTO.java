@@ -14,4 +14,6 @@ public class ProductInStockDTO {
     private Integer productId;
 
     private Integer quantity;
+
+    private Integer recommendedQuantity;
 }

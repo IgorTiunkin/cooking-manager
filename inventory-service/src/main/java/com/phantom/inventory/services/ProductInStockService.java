@@ -74,6 +74,12 @@ public class ProductInStockService {
         return productInStock;
     }
 
+    public List<ProductInStock> checkReplenishment() {
+        List<ProductInStock> productInStocks = productInStockRepository.findAll();
+        return productInStocks.stream().filter(entry -> entry.getQuantity()<entry.getRecommendedQuantity())
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public void bookStock(RecipeCookingOrderDTO recipeCookingOrderDTO) {
         //check timestamp
@@ -112,4 +118,6 @@ public class ProductInStockService {
                 stockChangeRepository.addStockChange(entry.getProductId(), -entry.getQuantity(), timestamp));
 
     }
+
+
 }

@@ -44,6 +44,8 @@ public class RecipeController {
     private static final String RECIPE_DELETE_ERROR_VIEW = "recipe/errors/recipe_delete_error";
     private static final String RECIPE_EDIT_VIEW = "recipe/edit";
     private static final String RECIPE_PREPARATION_INFO_VIEW = "/recipe/preparation_info";
+    private static final String RECIPE_BOOK_SUCCESS_VIEW = "/recipe/book_success";
+    private static final String RECIPE_BOOK_FAILED_VIEW = "/recipe/errors/book_failed";
 
     @GetMapping
     public String welcome() {
@@ -229,17 +231,14 @@ public class RecipeController {
         log.info("Request prepare recipe id {}", recipeShowDTO.getRecipeId());
         RecipeRestDTO recipeRestDTO = recipeRestToDtoMapper.convertToRecipeRestDTO(recipeShowDTO);
         RecipeCookingOrderDTO recipeCookingOrderDTO = inventoryService.bookProductsToCook(recipeRestDTO).get();
-        return "/recipe/book_success";
+        return RECIPE_BOOK_SUCCESS_VIEW;
     }
 
     @ExceptionHandler(ProductBookingException.class)
     public String failedBooking(ProductBookingException productBookingException) {
         log.info("Failed booking");
-        return "/recipe/errors/book_failed";
+        return RECIPE_BOOK_FAILED_VIEW;
     }
-
-
-
 
 
 }

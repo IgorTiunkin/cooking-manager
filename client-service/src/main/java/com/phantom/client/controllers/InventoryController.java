@@ -79,9 +79,9 @@ public class InventoryController {
     }
 
     @ExceptionHandler (ProductSaveException.class)
-    public String failedUpdate(WebRequest request, HttpSession session,
-                               ProductSaveException productSaveException,
-                               Model model) {
+    public String failedSave(WebRequest request, HttpSession session,
+                             ProductSaveException productSaveException,
+                             Model model) {
         ProductDTO productDTO = (ProductDTO) session.getAttribute("product");
         log.info("Failed save product. Name {}", productDTO.getProductName());
         model.addAttribute("product", productDTO);
@@ -140,9 +140,9 @@ public class InventoryController {
     }
 
     @ExceptionHandler (ProductUpdateException.class)
-    public String failedUpdate(WebRequest request, HttpSession session,
-                               ProductUpdateException productUpdateException,
-                               Model model) {
+    public String failedSave(WebRequest request, HttpSession session,
+                             ProductUpdateException productUpdateException,
+                             Model model) {
         ProductDTO productDTO = (ProductDTO) session.getAttribute("product");
         log.info("Failed update product. Id {}", productDTO.getProductId());
         model.addAttribute("product", productDTO);
@@ -189,5 +189,13 @@ public class InventoryController {
         return CHANGE_STOCK_ERROR_VIEW;
     }
 
+    @GetMapping("/check-replenishment")
+    public String checkStock (Model model) throws ExecutionException, InterruptedException {
+        log.info("Check problems with stock");
+        List<ProductInStockDTO> productInStockDTOS = inventoryService.checkReplenishment().get();
+        log.info("Get list of replenishments");
+        model.addAttribute("replenishments", productInStockDTOS);
+        return "/inventory/replenishments";
+    }
 
 }

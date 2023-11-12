@@ -81,6 +81,14 @@ public class ProductInStockController {
         return new ResponseEntity<>(recipeCookingOrderDTO, HttpStatus.OK);
     }
 
-
+    @GetMapping("/check-replenishment")
+    public ResponseEntity<List <ProductInStockDTO>> checkReplenishment() {
+        log.info("Check replenishment");
+        List<ProductInStock> productsToReplenish = productInStockService.checkReplenishment();
+        List<ProductInStockDTO> productInStockDTOS = productsToReplenish.stream()
+                .map(this::convertToProductInStockDTO)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(productInStockDTOS, HttpStatus.OK);
+    }
 
 }

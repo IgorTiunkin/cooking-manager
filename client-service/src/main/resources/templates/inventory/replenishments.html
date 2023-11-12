@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Replenishments</title>
+</head>
+<body style="background: bisque">
+<div th:replace="allheaders::recipe_header"></div>
+<div>
+    <div style="width: 50%;  margin: 0 auto">
+        <table rules="all">
+            <tbody style="text-align: right">
+            <tr>
+                <th>Product ID</th>
+                <th>Current quantity</th>
+                <th>Recommended quantity</th>
+                <th>Minimum to buy</th>
+            </tr>
+            <tr th:each="entry:${replenishments}" >
+                <td>
+                    <a th:href="@{/inventory/product/{id} (id = ${entry.getProductId()})}"
+                       th:text="${entry.getProductId()}"></a>
+                </td>
+                <td th:text = "${entry.getQuantity()}"></td>
+                <td th:text = "${entry.getRecommendedQuantity()}"></td>
+                <td th:text = "${entry.getRecommendedQuantity() - entry.getQuantity()}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
