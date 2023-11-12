@@ -33,6 +33,10 @@ public class ProductService {
         return productRepository.findById(productId);
     }
 
+    public Optional <Product> getByName(String name) {
+        return productRepository.findByProductName(name);
+    }
+
     @Transactional
     public Product save(Product product) {
         //If product with such name absent - save
@@ -47,23 +51,24 @@ public class ProductService {
 
     @Transactional
     public Product update(Product product) {
+        //If product with such name absent - save
         Optional<Product> productByName = getByName(product.getProductName());
         if (productByName.isEmpty()) return productRepository.save(product);
-        Product productFromDbByName = productByName.get();
-        if (product.getProductId().equals(productFromDbByName.getProductId())) return productRepository.save(product);
-        throw new ProductUpdateException("Such product name already present");
-    }
 
-    public Optional <Product> getByName(String name) {
-        return productRepository.findByProductName(name);
+        //if present - if absolute copy - ignore, else - block save if exception
+        Product productFromDbByName = productByName.get();
+        if (product.equals(productFromDbByName)) return productFromDbByName;
+        throw new ProductUpdateException("Such product name already present");
     }
 
     @Transactional
     public Product delete(Integer productId) {
         Optional<Product> productByID = productRepository.findById(productId);
         if (productByID.isEmpty()) throw new ProductDeleteException("Product not found");
-        productRepository.delete(productByID.get());
-        return productByID.get();
+
+        Product product = productByID.get();
+        productRepository.delete(product);
+        return product;
     }
 
 }
