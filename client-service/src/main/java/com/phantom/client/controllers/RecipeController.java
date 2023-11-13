@@ -12,6 +12,8 @@ import com.phantom.client.services.InventoryService;
 import com.phantom.client.services.RecipeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -30,6 +32,7 @@ import java.util.concurrent.ExecutionException;
 @SessionAttributes({"products", "recipe"})
 @RequiredArgsConstructor
 @Slf4j
+@RefreshScope
 public class RecipeController {
 
     private final RecipeService recipeService;
@@ -46,6 +49,16 @@ public class RecipeController {
     private static final String RECIPE_PREPARATION_INFO_VIEW = "/recipe/preparation_info";
     private static final String RECIPE_BOOK_SUCCESS_VIEW = "/recipe/book_success";
     private static final String RECIPE_BOOK_FAILED_VIEW = "/recipe/errors/book_failed";
+
+
+    @Value("${test.value}")
+    private String test;
+
+    @GetMapping("/test")
+    public String test() {
+        System.out.println(test);
+        return WELCOME_VIEW;
+    }
 
     @GetMapping
     public String welcome() {

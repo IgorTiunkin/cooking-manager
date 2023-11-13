@@ -11,6 +11,7 @@ import com.phantom.client.services.InventoryService;
 import com.phantom.client.services.RecipeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -41,6 +42,7 @@ public class InventoryController {
     private static final String INVENTORY_DELETE_VIEW = "/inventory/delete";
     private static final String INVENTORY_STOCK_VIEW = "/inventory/stock";
     private static final String CHANGE_STOCK_ERROR_VIEW = "/inventory/errors/inventory_change_stock_error";
+
 
     @GetMapping("/all")
     public String getAllProduct(Model model) throws ExecutionException, InterruptedException {
