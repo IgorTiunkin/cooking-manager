@@ -44,8 +44,8 @@ public class ProductInStockService {
     public ProductInStock updateStock(StockUpdateDTO stockUpdateDTO) {
         //Check for repeat with timestamp
         LocalDateTime timestamp = stockUpdateDTO.getTimestamp();
-        Optional<StockChange> stockChangeRepositoryByTimestamp = stockChangeRepository.findByTimestamp(timestamp);
-        if (stockChangeRepositoryByTimestamp.isPresent()) throw new ProductStockAlreadyChanged("already changed");
+        List<StockChange> allByTimestamp = stockChangeRepository.findAllByTimestamp(timestamp);
+        if (!allByTimestamp.isEmpty()) throw new ProductStockAlreadyChanged("already changed");
 
         //Check if product stillpresent
         Integer productId = stockUpdateDTO.getProductId();
@@ -68,6 +68,7 @@ public class ProductInStockService {
                 .change(quantityChange)
                 .timestamp(timestamp).build();
         stockChangeRepository.save(stockChange);
+
         productInStock.setQuantity(quantityChange+quantityInStock);
         productInStockRepository.save(productInStock);
 
@@ -84,8 +85,8 @@ public class ProductInStockService {
     public void bookStock(RecipeCookingOrderDTO recipeCookingOrderDTO) {
         //check timestamp
         LocalDateTime timestamp = recipeCookingOrderDTO.getTimestamp();
-        Optional<StockChange> stockChangeRepositoryByTimestamp = stockChangeRepository.findByTimestamp(timestamp);
-        if (stockChangeRepositoryByTimestamp.isPresent()) throw new ProductStockAlreadyChanged("this recipe already book");
+        List<StockChange> allByTimestamp = stockChangeRepository.findAllByTimestamp(timestamp);
+        if (!allByTimestamp.isEmpty()) throw new ProductStockAlreadyChanged("this recipe already book");
 
 
         //Get list of productId

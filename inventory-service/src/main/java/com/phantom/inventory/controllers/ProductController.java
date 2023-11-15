@@ -91,12 +91,13 @@ public class ProductController {
     }
 
     @PostMapping ("/update")
-    public ResponseEntity <ProductDTO> getProductById(@RequestBody ProductDTO productDTO) {
+    public ResponseEntity <ProductDTO> updateProduct (@RequestBody ProductDTO productDTO) {
         log.info("Request edit product. Id: {}", productDTO.getProductId());
         Product product = convertToProduct(productDTO);
-        productService.update(product);
-        log.info("Edit product. Id: {}", productDTO.getProductId());
-        return new ResponseEntity<>(productDTO, HttpStatus.OK);
+        Product updatedProduct = productService.update(product);
+        ProductDTO updatedProductDTO = convertToProductDTO(updatedProduct);
+        log.info("Edit product. Id: {}", updatedProduct.getProductId());
+        return new ResponseEntity<>(updatedProductDTO, HttpStatus.OK);
     }
 
     @ExceptionHandler (ProductUpdateException.class)

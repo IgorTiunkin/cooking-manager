@@ -7,10 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface StockChangeRepository extends JpaRepository<StockChange, Integer> {
-    Optional<StockChange> findByTimestamp(LocalDateTime timestamp);
+
+    List <StockChange> findAllByTimestamp(LocalDateTime timestamp);
 
     @Modifying
     @Transactional
