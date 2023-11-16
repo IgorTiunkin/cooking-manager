@@ -4,10 +4,10 @@ import com.phantom.recipe.dto.ProductAndQuantityDTO;
 import com.phantom.recipe.dto.RecipeRestDTO;
 import com.phantom.recipe.exceptions.RecipeNotFoundException;
 import com.phantom.recipe.exceptions.RecipeSaveException;
+import com.phantom.recipe.exceptions.RecipeUpdateException;
 import com.phantom.recipe.integration.BaseIT;
 import com.phantom.recipe.models.Recipe;
 import com.phantom.recipe.services.RecipeService;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -70,15 +70,19 @@ public class RecipeServiceIT extends BaseIT {
             .actions("Mix.")
             .productIDsAndQuantities(PRODUCT_IDS_AND_QUANTITIES_FOR_RECIPE_1)
             .build();
-    private final Recipe RECIPE_1_WITHOUT_ID = Recipe.builder()
+    private final RecipeRestDTO RECIPE_REST_DTO_1_WITHOUT_ID = RecipeRestDTO.builder()
             .title("Salad")
             .actions("Mix.")
-            .productIDsAndQuantities(PRODUCT_IDS_AND_QUANTITIES_FOR_RECIPE_1)
+            .productAndQuantityDTOList(List.of(RECIPE1_PRODUCT_1_WATER, RECIPE1_PRODUCT_2_BREAD))
             .build();
-    private final Recipe RECIPE_WITH_ABSENT_TITLE = Recipe.builder().title("Test").actions("Test")
-            .productIDsAndQuantities(new HashMap<>()).build();
-    private final Recipe RECIPE_WITH_SAME_TITLE = Recipe.builder().title(RECIPE_1.getTitle()).actions("Test2")
-            .productIDsAndQuantities(new HashMap<>()).build();
+    private final RecipeRestDTO RECIPE_REST_DTO_WITH_ABSENT_TITLE = RecipeRestDTO.builder()
+            .title("Test")
+            .actions("Test")
+            .productAndQuantityDTOList(new ArrayList<>()).build();
+    private final RecipeRestDTO RECIPE_REST_DTO_WITH_SAME_TITLE = RecipeRestDTO.builder()
+            .title(RECIPE_1.getTitle())
+            .actions("Test2")
+            .productAndQuantityDTOList(new ArrayList<>()).build();
 
     @Autowired
     public RecipeServiceIT(RecipeService recipeService) {
@@ -156,50 +160,8 @@ public class RecipeServiceIT extends BaseIT {
     }
 
     @Test
-    public void whenFullDuplicates_andCheckFullDuplicates_thenTrue() {
-        assertTrue(recipeService.checkFullDuplicatesByTitle(RECIPE_1_WITHOUT_ID));
-    }
-
-    @Test
-    public void whenAbsentTitle_andCheckFullDuplicates_thenFalse() {
-        assertFalse(recipeService.checkFullDuplicatesByTitle(RECIPE_WITH_ABSENT_TITLE));
-    }
-
-    @Test
-    public void whenPresentTitleWrongActions_andCheckFullDuplicates_thenFalse() {
-        Recipe recipe = Recipe.builder().title(RECIPE_1.getTitle()).actions("Test").build();
-        assertFalse(recipeService.checkFullDuplicatesByTitle(recipe));
-    }
-
-    @Test
-    public void whenSameTitle_andCheckSameTitle_thenTrue() {
-        assertTrue(recipeService.dbHasRecipeWithSameName(RECIPE_1_WITHOUT_ID));
-    }
-
-    @Test
-    public void whenAbsentTitle_andCheckSameTitle_thenTrue() {
-        Recipe recipe = Recipe.builder().recipeId(1).title("Test").build();
-        assertFalse(recipeService.dbHasRecipeWithSameName(recipe));
-    }
-
-    @Test
-    public void whenSameIdAndTitle_andCheckIDSame_thenTrue() {
-        assertTrue(recipeService.checkIdEqualityForSameTitle(RECIPE_1));
-    }
-
-    @Test
-    public void whenDifferentIdAndSameTitle_andCheckIDSame_thenFalse() {
-        assertFalse(recipeService.checkIdEqualityForSameTitle(RECIPE_1_WITHOUT_ID));
-    }
-
-    @Test
-    public void whenDifferentTitle_andCheckIDSame_thenFalse() {
-        assertFalse(recipeService.checkIdEqualityForSameTitle(RECIPE_WITH_ABSENT_TITLE));
-    }
-
-    @Test
     public void whenAbsentTitle_andGetByTitle_thenEmpty() {
-        assertTrue(recipeService.getRecipeByTitle(RECIPE_WITH_ABSENT_TITLE.getTitle()).isEmpty());
+        assertTrue(recipeService.getRecipeByTitle(RECIPE_REST_DTO_WITH_ABSENT_TITLE.getTitle()).isEmpty());
     }
 
     @Test
@@ -215,22 +177,87 @@ public class RecipeServiceIT extends BaseIT {
 
     @Test
     public void whenAbsentTitle_andSave_thenSave() {
-        Recipe savedRecipe = recipeService.save(RECIPE_WITH_ABSENT_TITLE);
-        assertEquals(RECIPE_WITH_ABSENT_TITLE.getTitle(), savedRecipe.getTitle());
-        Optional<Recipe> recipeByTitle = recipeService.getRecipeByTitle(RECIPE_WITH_ABSENT_TITLE.getTitle());
+        RecipeRestDTO savedRecipeRestDTO = recipeService.save(RECIPE_REST_DTO_WITH_ABSENT_TITLE);
+        assertEquals(RECIPE_REST_DTO_WITH_ABSENT_TITLE.getTitle(), savedRecipeRestDTO.getTitle());
+        Optional<Recipe> recipeByTitle = recipeService.getRecipeByTitle(RECIPE_REST_DTO_WITH_ABSENT_TITLE.getTitle());
         assertTrue(recipeByTitle.isPresent());
     }
 
     @Test
     public void whenAbsoluteCopy_andSave_thenok() {
-        Recipe savedRecipe = recipeService.save(RECIPE_1_WITHOUT_ID);
+        RecipeRestDTO savedRecipe = recipeService.save(RECIPE_REST_DTO_1_WITHOUT_ID);
         assertEquals(RECIPE_1.getRecipeId(), savedRecipe.getRecipeId());
     }
 
     @Test
     public void whenNotAbsoluteCopySameName_andSave_thenException() {
         assertThrows(RecipeSaveException.class,
-                () -> recipeService.save(RECIPE_WITH_SAME_TITLE));
+                () -> recipeService.save(RECIPE_REST_DTO_WITH_SAME_TITLE));
+    }
+
+    @Test
+    public void whenDeleteAbsent_thenException() {
+        assertThrows(RecipeNotFoundException.class,
+                () -> recipeService.delete(6));
+    }
+
+    @Test
+    public void whenDeletePresent_thenOk() {
+        RecipeRestDTO recipeRestDTO = recipeService.delete(RECIPE_REST_DTO_1.getRecipeId());
+        assertAll( () -> assertEquals(RECIPE_REST_DTO_1.getRecipeId(), recipeRestDTO.getRecipeId()),
+                () -> assertEquals(RECIPE_REST_DTO_1.getTitle(), recipeRestDTO.getTitle()),
+                () -> assertEquals(RECIPE_REST_DTO_1.getActions(), recipeRestDTO.getActions()));
+    }
+
+    @Test
+    public void whenAbsentTitle_andUpdate_thenUpdate() {
+        RecipeRestDTO savedRecipeRestDTO = recipeService.update(RECIPE_REST_DTO_WITH_ABSENT_TITLE);
+        assertEquals(RECIPE_REST_DTO_WITH_ABSENT_TITLE.getTitle(), savedRecipeRestDTO.getTitle());
+        Optional<Recipe> recipeByTitle = recipeService.getRecipeByTitle(RECIPE_REST_DTO_WITH_ABSENT_TITLE.getTitle());
+        assertTrue(recipeByTitle.isPresent());
+    }
+
+    @Test
+    public void whenAbsoluteCopy_andUpdate_thenok() {
+        RecipeRestDTO savedRecipe = recipeService.update(RECIPE_REST_DTO_1_WITHOUT_ID);
+        assertEquals(RECIPE_1.getRecipeId(), savedRecipe.getRecipeId());
+    }
+
+    @Test
+    public void whenNotAbsoluteCopySameName_andUpdate_thenException() {
+        assertThrows(RecipeUpdateException.class,
+                () -> recipeService.update(RECIPE_REST_DTO_WITH_SAME_TITLE));
+    }
+
+    @Test
+    public void whenProductId1_thenRecipeRestDTO1() {
+        List<RecipeRestDTO> recipeByProductId = recipeService.getRecipeByProductId(RECIPE1_PRODUCT_1_WATER.getProductId());
+        assertEquals(1, recipeByProductId.size());
+        RecipeRestDTO recipeRestDTO = recipeByProductId.get(0);
+        assertAll(() -> assertEquals(RECIPE_REST_DTO_1.getTitle(), recipeRestDTO.getTitle()),
+                () -> assertEquals(RECIPE_REST_DTO_1.getActions(), recipeRestDTO.getActions()),
+                () -> assertEquals(RECIPE_REST_DTO_1.getProductAndQuantityDTOList(), recipeRestDTO.getProductAndQuantityDTOList()));
+    }
+
+    @Test
+    public void whenProductId2_then2RecipeRestDTO() {
+        List<RecipeRestDTO> recipeByProductId = recipeService.getRecipeByProductId(RECIPE2_PRODUCT_2_BREAD.getProductId());
+        assertEquals(2, recipeByProductId.size());
+        RecipeRestDTO recipeRestDTO1 = recipeByProductId.get(0);
+        assertAll(() -> assertEquals(RECIPE_REST_DTO_1.getTitle(), recipeRestDTO1.getTitle()),
+                () -> assertEquals(RECIPE_REST_DTO_1.getActions(), recipeRestDTO1.getActions()),
+                () -> assertEquals(RECIPE_REST_DTO_1.getProductAndQuantityDTOList(), recipeRestDTO1.getProductAndQuantityDTOList()));
+        RecipeRestDTO recipeRestDTO2 = recipeByProductId.get(1);
+        assertAll(() -> assertEquals(RECIPE_REST_DTO_2.getTitle(), recipeRestDTO2.getTitle()),
+                () -> assertEquals(RECIPE_REST_DTO_2.getActions(), recipeRestDTO2.getActions()),
+                () -> assertEquals(RECIPE_REST_DTO_2.getProductAndQuantityDTOList(), recipeRestDTO2.getProductAndQuantityDTOList()));
+
+    }
+
+    @Test
+    public void whenProductIdAbsent_then0RecipeRestDTO() {
+        List<RecipeRestDTO> recipeByProductId = recipeService.getRecipeByProductId(6);
+        assertEquals(0, recipeByProductId.size());
     }
 
 }

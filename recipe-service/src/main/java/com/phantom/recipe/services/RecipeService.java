@@ -3,7 +3,9 @@ package com.phantom.recipe.services;
 import com.phantom.recipe.dto.RecipeRestDTO;
 import com.phantom.recipe.exceptions.RecipeNotFoundException;
 import com.phantom.recipe.exceptions.RecipeSaveException;
+import com.phantom.recipe.exceptions.RecipeUpdateException;
 import com.phantom.recipe.mappers.RecipeDTOMapper;
+import com.phantom.recipe.mappers.RecipeMapper;
 import com.phantom.recipe.repositories.RecipeRepository;
 import com.phantom.recipe.models.Recipe;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class RecipeService {
 
     private final RecipeRepository recipeRepository;
     private final RecipeDTOMapper recipeDTOMapper;
+    private final RecipeMapper recipeMapper;
 
 
     public List<RecipeRestDTO> getAllRecipes() {
@@ -32,28 +35,10 @@ public class RecipeService {
     }
 
     public RecipeRestDTO getRecipeById(Integer recipeId) {
-        Recipe recipe = recipeRepository.findById(recipeId).orElseThrow(() -> new RecipeNotFoundException("Recipe no found"));
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new RecipeNotFoundException("Recipe no found"));
         log.info("Found recipe # {}",  recipeId);
         return recipeDTOMapper.mapToRecipeRestDTOList(List.of(recipe)).get(0);
-    }
-
-    public boolean checkFullDuplicatesByTitle(Recipe recipe) {
-        Optional<Recipe> recipeByTitle = getRecipeByTitle(recipe.getTitle());
-        if (recipeByTitle.isEmpty()) return false;
-        Recipe recipeFromDb = recipeByTitle.get();
-        return recipeFromDb.equals(recipe);
-    }
-
-    public boolean dbHasRecipeWithSameName(Recipe recipe) {
-        Optional<Recipe> recipeByTitle = getRecipeByTitle(recipe.getTitle());
-        return recipeByTitle.isPresent();
-    }
-
-    public boolean checkIdEqualityForSameTitle(Recipe recipe) {
-        Optional<Recipe> recipeByTitle = getRecipeByTitle(recipe.getTitle());
-        if (recipeByTitle.isEmpty()) return false;
-        Recipe recipeFromDb = recipeByTitle.get();
-        return recipeFromDb.getRecipeId() == recipe.getRecipeId();
     }
 
     public Optional<Recipe> getRecipeByTitle(String title) {
@@ -61,14 +46,21 @@ public class RecipeService {
     }
 
     @Transactional
-    public Recipe save(Recipe recipe) {
+    public RecipeRestDTO save(RecipeRestDTO recipeRestDTO) {
+        Recipe recipe = recipeMapper.convertToRecipe(recipeRestDTO);
+
         //If recipe with such name absent - save
         Optional<Recipe> recipeByTitle = getRecipeByTitle(recipe.getTitle());
-        if (recipeByTitle.isEmpty()) return recipeRepository.save(recipe);
+        if (recipeByTitle.isEmpty()) {
+            Recipe savedRecipe = recipeRepository.save(recipe);
+            return recipeDTOMapper.mapToRecipeRestDTOList(List.of(savedRecipe)).get(0);
+        }
 
         //if present - if absolute copy - ignore, else - block save if exception
         Recipe recipeFromDBByTitle = recipeByTitle.get();
-        if (recipe.equals(recipeFromDBByTitle)) return recipeFromDBByTitle;
+        if (recipe.equals(recipeFromDBByTitle)) {
+            return recipeDTOMapper.mapToRecipeRestDTOList(List.of(recipeFromDBByTitle)).get(0);
+        }
         throw new RecipeSaveException("Such product name already present");
     }
 
@@ -77,6 +69,25 @@ public class RecipeService {
         RecipeRestDTO recipeById = getRecipeById(recipeId);
         recipeRepository.deleteById(recipeId);
         return recipeById;
+    }
+
+    @Transactional
+    public RecipeRestDTO update(RecipeRestDTO recipeRestDTO) {
+        Recipe recipe = recipeMapper.convertToRecipe(recipeRestDTO);
+
+        //If recipe with such name absent - update
+        Optional<Recipe> recipeByTitle = getRecipeByTitle(recipe.getTitle());
+        if (recipeByTitle.isEmpty()) {
+            Recipe savedRecipe = recipeRepository.save(recipe);
+            return recipeDTOMapper.mapToRecipeRestDTOList(List.of(savedRecipe)).get(0);
+        }
+
+        //if present - if absolute copy - ignore, else - block update if exception
+        Recipe recipeFromDBByTitle = recipeByTitle.get();
+        if (recipe.equals(recipeFromDBByTitle)) {
+            return recipeDTOMapper.mapToRecipeRestDTOList(List.of(recipeFromDBByTitle)).get(0);
+        }
+        throw new RecipeUpdateException("Such product name already present");
     }
 
     public List<RecipeRestDTO> getRecipeByProductId(Integer productId) {

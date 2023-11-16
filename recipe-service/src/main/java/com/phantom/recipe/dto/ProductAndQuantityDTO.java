@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
+@EqualsAndHashCode
 public class ProductAndQuantityDTO {
 
     private Integer productId;

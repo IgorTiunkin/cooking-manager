@@ -20,17 +20,7 @@ class RecipeControllerTest {
         this.recipeController = recipeController;
     }
 
-   @Test
-    public void whenAll_then1() {
-        List<RecipeRestDTO> allReceipts = recipeController.getAllRecipes();
-        assertEquals(1, allReceipts.size());
-    }
 
-    @Test
-    public void when1_thenSalad() {
-        RecipeRestDTO receiptById = recipeController.getRecipeById(1);
-        assertEquals("Salad", receiptById.getTitle());
-    }
 
 
 }

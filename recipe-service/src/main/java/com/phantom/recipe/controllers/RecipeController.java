@@ -3,11 +3,8 @@ package com.phantom.recipe.controllers;
 import com.phantom.recipe.dto.RecipeRestDTO;
 import com.phantom.recipe.exceptions.RecipeNotFoundException;
 import com.phantom.recipe.exceptions.RecipeSaveException;
-import com.phantom.recipe.mappers.RecipeDTOMapper;
-import com.phantom.recipe.mappers.RecipeMapper;
-import com.phantom.recipe.models.Recipe;
+import com.phantom.recipe.exceptions.RecipeUpdateException;
 import com.phantom.recipe.services.RecipeService;
-import com.phantom.recipe.validators.RecipeValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,35 +20,37 @@ import java.util.List;
 public class RecipeController {
 
     private final RecipeService recipeService;
-    private final RecipeMapper recipeMapper;
-    private final RecipeValidator recipeValidator;
-    private final RecipeDTOMapper recipeDTOMapper;
 
     @GetMapping("/all")
-    @ResponseStatus(HttpStatus.OK)
-    public List<RecipeRestDTO> getAllRecipes() {
+    public ResponseEntity <List <RecipeRestDTO>> getAllRecipes() {
         log.info("Request all recipes");
-        return recipeService.getAllRecipes();
+        List<RecipeRestDTO> recipeRestDTOList = recipeService.getAllRecipes();
+        return new ResponseEntity<>(recipeRestDTOList, HttpStatus.OK);
     }
 
     @GetMapping("/one")
-    @ResponseStatus(HttpStatus.OK)
-    public RecipeRestDTO getRecipeById(@RequestParam ("recipeId") Integer recipeId) {
+    public ResponseEntity <RecipeRestDTO> getRecipeById(@RequestParam ("recipeId") Integer recipeId) {
         log.info("Request recipe # {}", recipeId);
-        return recipeService.getRecipeById(recipeId);
+        RecipeRestDTO recipeRestDTO = recipeService.getRecipeById(recipeId);
+        return new ResponseEntity<>(recipeRestDTO, HttpStatus.OK);
+    }
+
+    @ExceptionHandler (RecipeNotFoundException.class)
+    public ResponseEntity <RecipeRestDTO> failedFoundRecipe(RecipeNotFoundException recipeNotFoundException) {
+        log.info("Recipe not found {}", recipeNotFoundException.getMessage());
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/save")
     public ResponseEntity <RecipeRestDTO> saveNewRecipe(@RequestBody RecipeRestDTO recipeRestDTO) {
         log.info("Request saving recipe: title - {}", recipeRestDTO.getTitle());
-        Recipe recipe = recipeMapper.convertToRecipe(recipeRestDTO);
-        Recipe savedRecipe = recipeService.save(recipe);
-        return new ResponseEntity<>(recipeRestDTO, HttpStatus.CREATED);
+        RecipeRestDTO savedRecipeRestDTO = recipeService.save(recipeRestDTO);
+        return new ResponseEntity<>(savedRecipeRestDTO, HttpStatus.CREATED);
     }
 
     @ExceptionHandler (RecipeSaveException.class)
     public ResponseEntity <RecipeRestDTO> failedSaveRecipe(RecipeSaveException recipeSaveException) {
-        log.info("Recipe not found {}", recipeSaveException.getMessage());
+        log.info("Exception. Same title is present");
         return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
@@ -63,28 +62,18 @@ public class RecipeController {
         return new ResponseEntity<>(recipeRestDTO, HttpStatus.OK);
     }
 
-    @ExceptionHandler (RecipeNotFoundException.class)
-    public ResponseEntity <RecipeRestDTO> failedFoundRecipe(RecipeNotFoundException recipeNotFoundException) {
-        log.info("Recipe not found {}", recipeNotFoundException.getMessage());
-        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-    }
 
     @PostMapping("/update")
     public ResponseEntity <RecipeRestDTO> updateRecipe(@RequestBody RecipeRestDTO recipeRestDTO) {
         log.info("Request updating recipe: title - {}", recipeRestDTO.getTitle());
-        Recipe recipe = recipeMapper.convertToRecipe(recipeRestDTO);
-        recipe.setRecipeId(recipeRestDTO.getRecipeId());
-        boolean dbHasRecipeWithSameName = recipeValidator.dbHasRecipeWithSameName(recipe);
-        boolean isIdEqualsForSameTitle = recipeValidator.checkIdEqualityForSameTitle(recipe);
-        if (!dbHasRecipeWithSameName || isIdEqualsForSameTitle) {
-            //if there are no same title or recipe with same title has same id
-            Recipe savedRecipe = recipeService.save(recipe);
-            log.info("Successfully updated: title - {}", savedRecipe.getTitle());
-            return new ResponseEntity<>(recipeRestDTO, HttpStatus.CREATED);
-        }
-        //different ids. same title - then exception
+        RecipeRestDTO updatedRecipeRestDTO = recipeService.update(recipeRestDTO);
+        return new ResponseEntity<>(updatedRecipeRestDTO, HttpStatus.OK);
+    }
+
+    @ExceptionHandler (RecipeUpdateException.class)
+    public ResponseEntity <RecipeRestDTO> failedSaveRecipe(RecipeUpdateException recipeUpdateException) {
         log.info("Exception. Same title is present");
-        return new ResponseEntity<>(recipeRestDTO, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/all-by-product")
