@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,14 +14,14 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
+@EqualsAndHashCode(exclude = "recipeId")
 public class RecipeRestDTO {
 
     private Integer recipeId;
 
     private String title;
 
-    private List<ProductAndQuantityDTO> productAndQuantityDTOList;
+    private List<ProductAndQuantityDTO> productAndQuantityDTOList = new ArrayList<>();
 
     private String actions;
 

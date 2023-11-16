@@ -95,62 +95,24 @@ public class RecipeServiceIT extends BaseIT {
         assertEquals(3, allRecipes.size());
 
         RecipeRestDTO recipeRestDTO1 = allRecipes.get(0);
-        List<ProductAndQuantityDTO> productAndQuantityDTOList1 = recipeRestDTO1.getProductAndQuantityDTOList();
-        ProductAndQuantityDTO recipe1product1 = productAndQuantityDTOList1.get(0);
-        ProductAndQuantityDTO recipe1product2 = productAndQuantityDTOList1.get(1);
-        assertAll(() -> assertEquals(RECIPE_REST_DTO_1.getRecipeId(), recipeRestDTO1.getRecipeId()),
-                () -> assertEquals(RECIPE_REST_DTO_1.getTitle(), recipeRestDTO1.getTitle()),
-                () -> assertEquals(RECIPE_REST_DTO_1.getActions(), recipeRestDTO1.getActions()),
-                () -> assertEquals(RECIPE1_PRODUCT_1_WATER.getProductId(), recipe1product1.getProductId()),
-                () -> assertEquals(RECIPE1_PRODUCT_1_WATER.getProductName(), recipe1product1.getProductName()),
-                () -> assertEquals(RECIPE1_PRODUCT_1_WATER.getCalories(), recipe1product1.getCalories()),
-                () -> assertEquals(RECIPE1_PRODUCT_1_WATER.getQuantity(), recipe1product1.getQuantity()),
-                () -> assertEquals(RECIPE1_PRODUCT_2_BREAD.getProductId(), recipe1product2.getProductId()),
-                () -> assertEquals(RECIPE1_PRODUCT_2_BREAD.getProductName(), recipe1product2.getProductName()),
-                () -> assertEquals(RECIPE1_PRODUCT_2_BREAD.getCalories(), recipe1product2.getCalories()),
-                () -> assertEquals(RECIPE1_PRODUCT_2_BREAD.getQuantity(), recipe1product2.getQuantity()));
-
+        assertAll(() -> assertEquals(RECIPE_REST_DTO_1, recipeRestDTO1),
+                () -> assertEquals(RECIPE_REST_DTO_1.getRecipeId(), recipeRestDTO1.getRecipeId()));
 
         RecipeRestDTO recipeRestDTO2 = allRecipes.get(1);
-        List<ProductAndQuantityDTO> productAndQuantityDTOList2 = recipeRestDTO2.getProductAndQuantityDTOList();
-        ProductAndQuantityDTO recipe2product1 = productAndQuantityDTOList2.get(0);
-        ProductAndQuantityDTO recipe2product2 = productAndQuantityDTOList2.get(1);
-        assertAll(() -> assertEquals(RECIPE_REST_DTO_2.getRecipeId(), recipeRestDTO2.getRecipeId()),
-                () -> assertEquals(RECIPE_REST_DTO_2.getTitle(), recipeRestDTO2.getTitle()),
-                () -> assertEquals(RECIPE_REST_DTO_2.getActions(), recipeRestDTO2.getActions()),
-                () -> assertEquals(RECIPE2_PRODUCT_2_BREAD.getProductId(), recipe2product1.getProductId()),
-                () -> assertEquals(RECIPE2_PRODUCT_2_BREAD.getProductName(), recipe2product1.getProductName()),
-                () -> assertEquals(RECIPE2_PRODUCT_2_BREAD.getCalories(), recipe2product1.getCalories()),
-                () -> assertEquals(RECIPE2_PRODUCT_2_BREAD.getQuantity(), recipe2product1.getQuantity()),
-                () -> assertEquals(RECIPE2_PRODUCT_3_TOMATO.getProductId(), recipe2product2.getProductId()),
-                () -> assertEquals(RECIPE2_PRODUCT_3_TOMATO.getProductName(), recipe2product2.getProductName()),
-                () -> assertEquals(RECIPE2_PRODUCT_3_TOMATO.getCalories(), recipe2product2.getCalories()),
-                () -> assertEquals(RECIPE2_PRODUCT_3_TOMATO.getQuantity(), recipe2product2.getQuantity()));
+        assertAll(() -> assertEquals(RECIPE_REST_DTO_2, recipeRestDTO2),
+                () -> assertEquals(RECIPE_REST_DTO_2.getRecipeId(), recipeRestDTO2.getRecipeId()));
 
 
         RecipeRestDTO recipeRestDTO3 = allRecipes.get(2);
-        assertAll(() -> assertEquals(RECIPE_REST_DTO_3.getRecipeId(), recipeRestDTO3.getRecipeId()),
-                () -> assertEquals(RECIPE_REST_DTO_3.getTitle(), recipeRestDTO3.getTitle()),
-                () -> assertEquals(RECIPE_REST_DTO_3.getActions(), recipeRestDTO3.getActions()));
+        assertAll(() -> assertEquals(RECIPE_REST_DTO_3, recipeRestDTO3),
+                () -> assertEquals(RECIPE_REST_DTO_3.getRecipeId(), recipeRestDTO3.getRecipeId()));
     }
 
     @Test
     public void whenRecipeId1_thenRecipe1 () {
         RecipeRestDTO recipeById1 = recipeService.getRecipeById(RECIPE_REST_DTO_1.getRecipeId());
-        List<ProductAndQuantityDTO> productAndQuantityDTOList1 = recipeById1.getProductAndQuantityDTOList();
-        ProductAndQuantityDTO recipe1product1 = productAndQuantityDTOList1.get(0);
-        ProductAndQuantityDTO recipe1product2 = productAndQuantityDTOList1.get(1);
-        assertAll(() -> assertEquals(RECIPE_REST_DTO_1.getRecipeId(), recipeById1.getRecipeId()),
-                () -> assertEquals(RECIPE_REST_DTO_1.getTitle(), recipeById1.getTitle()),
-                () -> assertEquals(RECIPE_REST_DTO_1.getActions(), recipeById1.getActions()),
-                () -> assertEquals(RECIPE1_PRODUCT_1_WATER.getProductId(), recipe1product1.getProductId()),
-                () -> assertEquals(RECIPE1_PRODUCT_1_WATER.getProductName(), recipe1product1.getProductName()),
-                () -> assertEquals(RECIPE1_PRODUCT_1_WATER.getCalories(), recipe1product1.getCalories()),
-                () -> assertEquals(RECIPE1_PRODUCT_1_WATER.getQuantity(), recipe1product1.getQuantity()),
-                () -> assertEquals(RECIPE1_PRODUCT_2_BREAD.getProductId(), recipe1product2.getProductId()),
-                () -> assertEquals(RECIPE1_PRODUCT_2_BREAD.getProductName(), recipe1product2.getProductName()),
-                () -> assertEquals(RECIPE1_PRODUCT_2_BREAD.getCalories(), recipe1product2.getCalories()),
-                () -> assertEquals(RECIPE1_PRODUCT_2_BREAD.getQuantity(), recipe1product2.getQuantity()));
+        assertAll(() -> assertEquals(RECIPE_REST_DTO_1, recipeById1),
+                () -> assertEquals(RECIPE_REST_DTO_1.getRecipeId(), recipeById1.getRecipeId()));
     }
 
     @Test
@@ -234,9 +196,7 @@ public class RecipeServiceIT extends BaseIT {
         List<RecipeRestDTO> recipeByProductId = recipeService.getRecipeByProductId(RECIPE1_PRODUCT_1_WATER.getProductId());
         assertEquals(1, recipeByProductId.size());
         RecipeRestDTO recipeRestDTO = recipeByProductId.get(0);
-        assertAll(() -> assertEquals(RECIPE_REST_DTO_1.getTitle(), recipeRestDTO.getTitle()),
-                () -> assertEquals(RECIPE_REST_DTO_1.getActions(), recipeRestDTO.getActions()),
-                () -> assertEquals(RECIPE_REST_DTO_1.getProductAndQuantityDTOList(), recipeRestDTO.getProductAndQuantityDTOList()));
+        assertEquals(RECIPE_REST_DTO_1, recipeRestDTO);
     }
 
     @Test
@@ -244,14 +204,9 @@ public class RecipeServiceIT extends BaseIT {
         List<RecipeRestDTO> recipeByProductId = recipeService.getRecipeByProductId(RECIPE2_PRODUCT_2_BREAD.getProductId());
         assertEquals(2, recipeByProductId.size());
         RecipeRestDTO recipeRestDTO1 = recipeByProductId.get(0);
-        assertAll(() -> assertEquals(RECIPE_REST_DTO_1.getTitle(), recipeRestDTO1.getTitle()),
-                () -> assertEquals(RECIPE_REST_DTO_1.getActions(), recipeRestDTO1.getActions()),
-                () -> assertEquals(RECIPE_REST_DTO_1.getProductAndQuantityDTOList(), recipeRestDTO1.getProductAndQuantityDTOList()));
+        assertEquals(RECIPE_REST_DTO_1, recipeRestDTO1);
         RecipeRestDTO recipeRestDTO2 = recipeByProductId.get(1);
-        assertAll(() -> assertEquals(RECIPE_REST_DTO_2.getTitle(), recipeRestDTO2.getTitle()),
-                () -> assertEquals(RECIPE_REST_DTO_2.getActions(), recipeRestDTO2.getActions()),
-                () -> assertEquals(RECIPE_REST_DTO_2.getProductAndQuantityDTOList(), recipeRestDTO2.getProductAndQuantityDTOList()));
-
+        assertEquals(RECIPE_REST_DTO_2, recipeRestDTO2);
     }
 
     @Test
