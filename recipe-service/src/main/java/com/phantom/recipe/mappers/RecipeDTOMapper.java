@@ -21,20 +21,12 @@ public class RecipeDTOMapper {
     private final WebClient.Builder webClientBuilder;
 
 
-    public List<RecipeRestDTO> mapToRecipeRestDTOList(List<Recipe> recipeList) { //todo - convert to new class
+    public List<RecipeRestDTO> mapToRecipeRestDTOList(List<Recipe> recipeList) {
         //create set of unique product id - to make only one call
-        Set <Integer> recipeIds = new HashSet<>();
-        recipeList.forEach(recipe -> recipeIds.addAll(recipe.getProductIDsAndQuantities().keySet()));
+        Set <Integer> productIds = new HashSet<>();
+        recipeList.forEach(recipe -> productIds.addAll(recipe.getProductIDsAndQuantities().keySet()));
 
-        //get data for products
-        List<ProductDTO> productDTOS = webClientBuilder.build()
-                .get()
-                .uri("http://api-gateway/api/v1/product/in",
-                        uriBuilder -> uriBuilder.queryParam("recipeIds", recipeIds).build())
-                .retrieve()
-                .bodyToFlux(ProductDTO.class)
-                .collectList()
-                .block();
+        List<ProductDTO> productDTOS = getProductDTOSbyProductIds(productIds);
 
         //create map productid - productDTO
         Map<Integer, ProductDTO> productDTOMap =
@@ -43,6 +35,18 @@ public class RecipeDTOMapper {
         return recipeList.stream().map(entry -> this.convertToRecipeRestDTO(entry, productDTOMap))
                 .collect(Collectors.toList());
 
+    }
+
+    public List<ProductDTO> getProductDTOSbyProductIds(Set<Integer> productIds) { //todo - convert to new class
+        //get data for products
+        return webClientBuilder.build()
+                .get()
+                .uri("http://api-gateway/api/v1/product/in",
+                        uriBuilder -> uriBuilder.queryParam("productIds", productIds).build())
+                .retrieve()
+                .bodyToFlux(ProductDTO.class)
+                .collectList()
+                .block();
     }
 
     public RecipeRestDTO convertToRecipeRestDTO(Recipe recipe, Map<Integer, ProductDTO> productDTOMap ) {
@@ -59,6 +63,18 @@ public class RecipeDTOMapper {
                         (new ProductAndQuantityDTO(productDTOMap.get(entry.getKey()), entry.getValue())));
         recipeRestDTO.setProductAndQuantityDTOList(productAndQuantityDTOList);
         return recipeRestDTO;
+    }
+
+    public RecipeRestDTO mapToRecipeRestDTO (Recipe recipe) {
+        Set<Integer> productIds = recipe.getProductIDsAndQuantities().keySet();
+
+        List<ProductDTO> productDTOS = getProductDTOSbyProductIds(productIds);
+
+        //create map productid - productDTO
+        Map<Integer, ProductDTO> productDTOMap =
+                productDTOS.stream().collect(Collectors.toMap(ProductDTO::getProductId, Function.identity()));
+
+        return convertToRecipeRestDTO(recipe, productDTOMap);
     }
 
 }

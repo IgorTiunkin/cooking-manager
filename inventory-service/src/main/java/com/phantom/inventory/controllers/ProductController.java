@@ -36,7 +36,7 @@ public class ProductController {
 
     @GetMapping ("/in")
     @ResponseStatus(HttpStatus.OK)
-    public List<ProductDTO> getProductsIn(@RequestParam ("recipeIds") Set <Integer> productIdList) {
+    public List<ProductDTO> getProductsIn(@RequestParam ("productIds") Set <Integer> productIdList) {
         log.info("Requested products in list");
         List<Product> productList = productService.getAllById(new ArrayList<>(productIdList));
         return productList.stream().map(this::convertToProductDTO).collect(Collectors.toList());

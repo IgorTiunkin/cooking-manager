@@ -38,7 +38,7 @@ public class RecipeService {
         Recipe recipe = recipeRepository.findById(recipeId)
                 .orElseThrow(() -> new RecipeNotFoundException("Recipe no found"));
         log.info("Found recipe # {}",  recipeId);
-        return recipeDTOMapper.mapToRecipeRestDTOList(List.of(recipe)).get(0);
+        return recipeDTOMapper.mapToRecipeRestDTO(recipe);
     }
 
     public Optional<Recipe> getRecipeByTitle(String title) {
@@ -53,13 +53,13 @@ public class RecipeService {
         Optional<Recipe> recipeByTitle = getRecipeByTitle(recipe.getTitle());
         if (recipeByTitle.isEmpty()) {
             Recipe savedRecipe = recipeRepository.save(recipe);
-            return recipeDTOMapper.mapToRecipeRestDTOList(List.of(savedRecipe)).get(0);
+            return recipeDTOMapper.mapToRecipeRestDTO(recipe);
         }
 
         //if present - if absolute copy - ignore, else - block save if exception
         Recipe recipeFromDBByTitle = recipeByTitle.get();
         if (recipe.equals(recipeFromDBByTitle)) {
-            return recipeDTOMapper.mapToRecipeRestDTOList(List.of(recipeFromDBByTitle)).get(0);
+            return recipeDTOMapper.mapToRecipeRestDTO(recipeFromDBByTitle);
         }
         throw new RecipeSaveException("Such product name already present");
     }
@@ -79,13 +79,13 @@ public class RecipeService {
         Optional<Recipe> recipeByTitle = getRecipeByTitle(recipe.getTitle());
         if (recipeByTitle.isEmpty()) {
             Recipe savedRecipe = recipeRepository.save(recipe);
-            return recipeDTOMapper.mapToRecipeRestDTOList(List.of(savedRecipe)).get(0);
+            return recipeDTOMapper.mapToRecipeRestDTO(savedRecipe);
         }
 
         //if present - if absolute copy - ignore, else - block update if exception
         Recipe recipeFromDBByTitle = recipeByTitle.get();
         if (recipe.equals(recipeFromDBByTitle)) {
-            return recipeDTOMapper.mapToRecipeRestDTOList(List.of(recipeFromDBByTitle)).get(0);
+            return recipeDTOMapper.mapToRecipeRestDTO(recipeFromDBByTitle);
         }
         throw new RecipeUpdateException("Such product name already present");
     }
