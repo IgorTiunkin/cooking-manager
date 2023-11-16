@@ -2,6 +2,8 @@ package com.phantom.recipe.controllers;
 
 import com.phantom.recipe.dto.RecipeRestDTO;
 import com.phantom.recipe.exceptions.RecipeNotFoundException;
+import com.phantom.recipe.exceptions.RecipeSaveException;
+import com.phantom.recipe.mappers.RecipeDTOMapper;
 import com.phantom.recipe.mappers.RecipeMapper;
 import com.phantom.recipe.models.Recipe;
 import com.phantom.recipe.services.RecipeService;
@@ -23,6 +25,7 @@ public class RecipeController {
     private final RecipeService recipeService;
     private final RecipeMapper recipeMapper;
     private final RecipeValidator recipeValidator;
+    private final RecipeDTOMapper recipeDTOMapper;
 
     @GetMapping("/all")
     @ResponseStatus(HttpStatus.OK)
@@ -42,30 +45,28 @@ public class RecipeController {
     public ResponseEntity <RecipeRestDTO> saveNewRecipe(@RequestBody RecipeRestDTO recipeRestDTO) {
         log.info("Request saving recipe: title - {}", recipeRestDTO.getTitle());
         Recipe recipe = recipeMapper.convertToRecipe(recipeRestDTO);
-        boolean isFullDuplicateFound = recipeValidator.checkFullDuplicatesByTitle(recipe);
-        boolean dbHasRecipeWithSameName = recipeValidator.dbHasRecipeWithSameName(recipe);
-        if (!isFullDuplicateFound && dbHasRecipeWithSameName) {
-            //countermeasure for retry - exception only for same name and different inside
-            log.info("Exception. Same title is present");
-            return new ResponseEntity<>(recipeRestDTO, HttpStatus.BAD_REQUEST);
-        }
-        if (!isFullDuplicateFound) {
-            Recipe savedRecipe = recipeService.save(recipe);
-            recipeRestDTO.setRecipeId(savedRecipe.getRecipeId());
-            log.info("Successfully saved: title - {}", recipeRestDTO.getTitle());
-        }
+        Recipe savedRecipe = recipeService.save(recipe);
         return new ResponseEntity<>(recipeRestDTO, HttpStatus.CREATED);
     }
 
+    @ExceptionHandler (RecipeSaveException.class)
+    public ResponseEntity <RecipeRestDTO> failedSaveRecipe(RecipeSaveException recipeSaveException) {
+        log.info("Recipe not found {}", recipeSaveException.getMessage());
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    }
+
+
     @DeleteMapping("/delete")
     public ResponseEntity <RecipeRestDTO> deleteRecipe(@RequestParam Integer recipeId) {
-        try {
-            RecipeRestDTO recipeRestDTO = recipeService.delete(recipeId);
-            log.info("Deleted recipe from db. Recipe id = {}", recipeRestDTO.getRecipeId());
-            return new ResponseEntity<>(recipeRestDTO, HttpStatus.OK);
-        } catch (RecipeNotFoundException recipeNotFoundException) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
+        RecipeRestDTO recipeRestDTO = recipeService.delete(recipeId);
+        log.info("Deleted recipe from db. Recipe id = {}", recipeRestDTO.getRecipeId());
+        return new ResponseEntity<>(recipeRestDTO, HttpStatus.OK);
+    }
+
+    @ExceptionHandler (RecipeNotFoundException.class)
+    public ResponseEntity <RecipeRestDTO> failedFoundRecipe(RecipeNotFoundException recipeNotFoundException) {
+        log.info("Recipe not found {}", recipeNotFoundException.getMessage());
+        return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/update")

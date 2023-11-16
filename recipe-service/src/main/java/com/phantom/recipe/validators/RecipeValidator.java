@@ -14,7 +14,6 @@ public class RecipeValidator {
     private final RecipeService recipeService;
 
 
-
     public boolean checkFullDuplicatesByTitle(Recipe recipe) {
         Optional<Recipe> recipeByTitle = recipeService.getRecipeByTitle(recipe.getTitle());
         if (recipeByTitle.isEmpty()) return false;
