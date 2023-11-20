@@ -96,7 +96,7 @@ public class ProductControllerIT extends BaseIT {
     public void when12_thenWaterBread() throws Exception {
         mvc.perform(MockMvcRequestBuilders.get(IN_ID_URL)
         .accept(MediaType.APPLICATION_JSON)
-        .param("recipeIds", "1", "2"))
+        .param("productIds", "1", "2"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$",
                         Matchers.hasSize(2)))
