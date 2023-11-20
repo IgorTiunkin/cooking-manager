@@ -2,6 +2,7 @@ package com.phantom.inventory.integration.services;
 
 
 import com.phantom.inventory.dto.ProductAndQuantityDTO;
+import com.phantom.inventory.dto.ProductInStockDTO;
 import com.phantom.inventory.dto.RecipeCookingOrderDTO;
 import com.phantom.inventory.dto.StockUpdateDTO;
 import com.phantom.inventory.exceptions.ProductNotEnoughQuantityException;
@@ -147,7 +148,7 @@ public class ProductInStockServiceIT extends BaseIT {
                 .change(change)
                 .timestamp(timestamp)
                 .build();
-        ProductInStock productInStock = productInStockService.updateStock(stockUpdateDTO);
+        ProductInStockDTO productInStock = productInStockService.updateStock(stockUpdateDTO);
 
         Integer currentQuantity = productInStockService.getQuantityById(PRODUCT_1_WATER.getProductId());
         assertEquals(PRODUCT_IN_STOCK_1_WATER.getQuantity()+change,
@@ -165,15 +166,15 @@ public class ProductInStockServiceIT extends BaseIT {
 
     @Test
     public void whenCheckReplenishment_then2() {
-        List<ProductInStock> productInStocks = productInStockService.checkReplenishment();
+        List<ProductInStockDTO> productInStocks = productInStockService.checkReplenishment();
         assertEquals(2, productInStocks.size());
 
-        ProductInStock productInStock1 = productInStocks.get(0);
-        assertAll(() -> assertEquals(PRODUCT_1_WATER.getProductId(), productInStock1.getProduct().getProductId()),
+        ProductInStockDTO productInStock1 = productInStocks.get(0);
+        assertAll(() -> assertEquals(PRODUCT_1_WATER.getProductId(), productInStock1.getProductId()),
                 () -> assertEquals(PRODUCT_IN_STOCK_1_WATER.getQuantity(), productInStock1.getQuantity()),
                 () -> assertEquals(PRODUCT_IN_STOCK_1_WATER.getRecommendedQuantity(), productInStock1.getRecommendedQuantity()));
 
-        ProductInStock productInStock2 = productInStocks.get(1);
+        ProductInStockDTO productInStock2 = productInStocks.get(1);
         assertAll(() -> assertEquals(PRODUCT_IN_STOCK_4_POTATO.getQuantity(), productInStock2.getQuantity()),
                 () -> assertEquals(PRODUCT_IN_STOCK_4_POTATO.getRecommendedQuantity(), productInStock2.getRecommendedQuantity()));
     }

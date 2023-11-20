@@ -1,6 +1,7 @@
 package com.phantom.inventory.services;
 
 import com.phantom.inventory.dto.ProductAndQuantityDTO;
+import com.phantom.inventory.dto.ProductInStockDTO;
 import com.phantom.inventory.dto.RecipeCookingOrderDTO;
 import com.phantom.inventory.exceptions.ProductNotEnoughQuantityException;
 import com.phantom.inventory.dto.StockUpdateDTO;
@@ -13,6 +14,7 @@ import com.phantom.inventory.repositories.ProductInStockRepository;
 import com.phantom.inventory.repositories.ProductRepository;
 import com.phantom.inventory.repositories.StockChangeRepository;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +33,7 @@ public class ProductInStockService {
     private final ProductInStockRepository productInStockRepository;
     private final StockChangeRepository stockChangeRepository;
     private final ProductRepository productRepository;
+    private final ModelMapper modelMapper;
 
     public List <ProductInStock> getProductInStockByIds(List<Integer> listOfProductId) {
         return productInStockRepository.findAllByProductIn(listOfProductId);
@@ -41,7 +44,7 @@ public class ProductInStockService {
     }
 
     @Transactional
-    public ProductInStock updateStock(StockUpdateDTO stockUpdateDTO) {
+    public ProductInStockDTO updateStock(StockUpdateDTO stockUpdateDTO) {
         //Check for repeat with timestamp
         LocalDateTime timestamp = stockUpdateDTO.getTimestamp();
         List<StockChange> allByTimestamp = stockChangeRepository.findAllByTimestamp(timestamp);
@@ -71,13 +74,16 @@ public class ProductInStockService {
 
         productInStock.setQuantity(quantityChange+quantityInStock);
         productInStockRepository.save(productInStock);
-
-        return productInStock;
+        return convertToProductInStockDTO(productInStock);
     }
 
-    public List<ProductInStock> checkReplenishment() {
+    public List<ProductInStockDTO> checkReplenishment() {
         List<ProductInStock> productInStocks = productInStockRepository.findAll();
-        return productInStocks.stream().filter(entry -> entry.getQuantity()<entry.getRecommendedQuantity())
+        List<ProductInStock> productsToReplenish = productInStocks.stream()
+                .filter(entry -> entry.getQuantity() < entry.getRecommendedQuantity())
+                .collect(Collectors.toList());
+        return productsToReplenish.stream()
+                .map(this::convertToProductInStockDTO)
                 .collect(Collectors.toList());
     }
 
@@ -118,6 +124,11 @@ public class ProductInStockService {
         bookOrder.forEach(entry ->
                 stockChangeRepository.addStockChange(entry.getProductId(), -entry.getQuantity(), timestamp));
 
+    }
+
+
+    private ProductInStockDTO convertToProductInStockDTO(ProductInStock productInStock) {
+        return modelMapper.map(productInStock, ProductInStockDTO.class);
     }
 
 

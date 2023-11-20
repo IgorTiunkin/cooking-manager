@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 public class ProductInStockController {
 
     private final ProductInStockService productInStockService;
-    private final ModelMapper modelMapper;
     private final ProductInStockToPrepareDTOMapper productInStockToPrepareDTOMapper;
 
     @GetMapping("/get-by-id")
@@ -41,9 +40,8 @@ public class ProductInStockController {
     @PostMapping("/change")
     public ResponseEntity<ProductInStockDTO> changeStock(@RequestBody StockUpdateDTO stockUpdateDTO) {
         log.info("Request Stock update, id {}, quantity {}", stockUpdateDTO.getProductId(), stockUpdateDTO.getChange());
-        ProductInStock productInStock = productInStockService.updateStock(stockUpdateDTO);
-        log.info("Stock changed. new quantity {}", productInStock.getQuantity());
-        ProductInStockDTO productInStockDTO = convertToProductInStockDTO(productInStock);
+        ProductInStockDTO productInStockDTO = productInStockService.updateStock(stockUpdateDTO);
+        log.info("Stock changed. new quantity {}", productInStockDTO.getQuantity());
         return new ResponseEntity<>(productInStockDTO, HttpStatus.OK);
     }
 
@@ -70,10 +68,6 @@ public class ProductInStockController {
         return new ResponseEntity<>(productsForPrepareDTOS, HttpStatus.OK);
     }
 
-    private ProductInStockDTO convertToProductInStockDTO(ProductInStock productInStock) {
-        return modelMapper.map(productInStock, ProductInStockDTO.class);
-    }
-
     @PostMapping ("/book-order")
     public ResponseEntity <RecipeCookingOrderDTO> bookStock(@RequestBody RecipeCookingOrderDTO recipeCookingOrderDTO) {
         log.info("Request book fo recipe id {}", recipeCookingOrderDTO.getRecipeId());
@@ -84,10 +78,7 @@ public class ProductInStockController {
     @GetMapping("/check-replenishment")
     public ResponseEntity<List <ProductInStockDTO>> checkReplenishment() {
         log.info("Check replenishment");
-        List<ProductInStock> productsToReplenish = productInStockService.checkReplenishment();
-        List<ProductInStockDTO> productInStockDTOS = productsToReplenish.stream()
-                .map(this::convertToProductInStockDTO)
-                .collect(Collectors.toList());
+        List<ProductInStockDTO> productInStockDTOS = productInStockService.checkReplenishment();
         return new ResponseEntity<>(productInStockDTOS, HttpStatus.OK);
     }
 
