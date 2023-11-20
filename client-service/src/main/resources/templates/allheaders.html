@@ -8,7 +8,7 @@
 <div th:fragment="recipe_header" class="">
     <div>
         <div style="width: 50%;  margin: 0 auto; font-size: 18px">
-            <span>Navigation</span>
+            <span th:text="#{navigation.title}"></span>
             <nav>
                 <a th:href="@{/recipe}" th:text="'Main page'" style="text-decoration: none;"></a> |
                 <a th:href="@{/recipe/all}" th:text="'All recepies'" style="text-decoration: none;"></a> |
@@ -16,6 +16,8 @@
                 <a th:href="@{/inventory/all}" th:text="'All products'" style="text-decoration: none;"></a>|
                 <a th:href="@{/inventory/create}" th:text="'Create product'" style="text-decoration: none;"></a>
             </nav> <br>
+            <a th:href="@{?lang=ru}" th:text="'Русский язык'"></a>
+            <a th:href="@{?lang=en}" th:text="'English'"></a>
         </div>
     </div>
 </div>
